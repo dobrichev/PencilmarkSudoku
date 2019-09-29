@@ -28,7 +28,7 @@ int cmdSolve::exec() {
 		char outPuz[729];
 		if(vanilla) {
 			char p[81];
-			for(int i = 0; i < 81; i++) p[i] = (line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
+			for(int i = 0; i < 81; i++) p[i] = (char)(line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
 			if(1 != ss.solve(p, sol)) return 1;
 		}
 		else {

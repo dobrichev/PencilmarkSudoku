@@ -19,8 +19,8 @@
 //for low-clue pencilmark-only sudoku
 //#define GUESS_STRATEGY_2
 
-#define USE_LOCKED_CANDIDATES
-#define LOCKED_CANDIDATES_ALWAYS
+#define USE_LOCKED_CANDIDATES // <<<<<<<<<<<<<============== bug there !!!!!!!!!!!!!
+//#define LOCKED_CANDIDATES_ALWAYS
 #define LOCKED_CANDIDATES_USE_CACHE
 
 //#define USE_SUBSETS
@@ -61,7 +61,7 @@ struct pencilmarks {
 	pencilmarks& fromSolver(const bm128* solverPM) {
 		for(int d = 0; d < 9; d++) {
 			//pm[d] = constraints::mask81;
-			pm[d] = (t_128){0xFFFFFFFFFFFFFFFF,    0x0001FFFF};
+			pm[d] = t_128({0xFFFFFFFFFFFFFFFF,    0x0001FFFF});
 			pm[d].clearBits(solverPM[d]); //allow all active pencilmarks
 		}
 		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
@@ -82,7 +82,7 @@ struct pencilmarks {
     	char* res = dest;
 		for(int c = 0; c < 81; c++) {
 			for(int d = 0; d < 9; d++) {
-				*res = pm[d].isBitSet(c) ? '.' : d + '1';
+				*res = (char)(pm[d].isBitSet(c) ? '.' : d + '1');
 				res++;
 			}
 		}

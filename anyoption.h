@@ -142,9 +142,9 @@ public: /* the public interface */
          * get the value of the options 
 	 * will return NULL if no value is set 
          */
-	char *getValue( const char *_option );
+	const char *getValue( const char *_option );
 	bool  getFlag( const char *_option );
-	char *getValue( char _optchar );
+	const char *getValue( char _optchar );
 	bool  getFlag( char _optchar );
 
 	/*

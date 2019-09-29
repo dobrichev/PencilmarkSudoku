@@ -537,7 +537,7 @@ void transformer::transform(const char *in, char *out) const {
 	bool isPuzzle = false;
 	for(int r = 0; r < 9; r++) {
 		for(int c = 0; c < 9; c++) {
-			char mapped = map[(int)in[tc.swap[box][row[r]][col[c]]]];
+			char mapped = (char)map[(int)in[tc.swap[box][row[r]][col[c]]]];
 			isPuzzle |= (mapped == 0);
 			*s++ = mapped;
 		}
@@ -567,7 +567,7 @@ void transformer::reverseTransform(const char *in, char *out) const {
 	}
 	for(int r = 0; r < 9; r++) {
 		for(int c = 0; c < 9; c++) {
-			out[tc.swap[box][row[r]][col[c]]] = labelMap[(int)in[9 * r + c]];
+			out[tc.swap[box][row[r]][col[c]]] = (char)labelMap[(int)in[9 * r + c]];
 		}
 	}
 }

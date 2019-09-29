@@ -27,20 +27,22 @@ options::options() {
 	anyopt.addUsage(" --solve             Solve puzzles");
 	anyopt.setCommandFlag("solve");
 	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
+	anyopt.setCommandFlag("vanilla");
+	anyopt.addUsage("   --groupbygrid         Normalized puzzles grouped by solution (not impl.)");
 	anyopt.setCommandFlag("groupbygrid");
-	anyopt.addUsage("   --groupbygrid         Normalized puzzles grouped by solution");
-	anyopt.setCommandFlag("groupbygrid");
-	anyopt.addUsage("     --gridsonly             Prints ordered solution grids w/o duplicates");
+	anyopt.addUsage("     --gridsonly             Prints ordered solution grids w/o duplicates (not impl.)");
 	anyopt.setFlag("gridsonly");
-	anyopt.addUsage("   --minimals            Check puzzles for minimality");
+	anyopt.addUsage("   --minimals            Check puzzles for minimality (not impl.)");
 	anyopt.setFlag("minimals");
-	anyopt.addUsage("   --count               Print only the solution count");
+	anyopt.addUsage("   --count               Print only the solution count (not impl.)");
 	anyopt.setFlag("count");
-	anyopt.addUsage("     --maxsolutioncount <n>  Solves up to <n>-th solution (INT_MAX)");
+	anyopt.addUsage("     --maxsolutioncount <n>  Solves up to <n>-th solution (INT_MAX) (not impl.)");
 	anyopt.setOption("maxsolutioncount");
-	anyopt.addUsage("   --backdoor            Print backdoors size & exemplar");
-	anyopt.setFlag("backdoor");
 
+	anyopt.addUsage(" --backdoor          Print backdoors size & exemplar");
+	anyopt.setCommandFlag("backdoor");
+	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks) (not impl.)");
+	//anyopt.setCommandFlag("vanilla");
 
 	anyopt.addUsage("");
 
@@ -88,9 +90,9 @@ const char* options::getValue(const char* key) {
 	return anyopt.getValue(key);
 }
 
-const int options::getIntValue(const char* key, const int defaultValue) {
-	char* textVal = anyopt.getValue(key);
-	if(textVal) return atoi(anyopt.getValue(key));
+int options::getIntValue(const char* key, const int defaultValue) {
+	const char* textVal = anyopt.getValue(key);
+	if(textVal) return atoi(textVal);
 	return defaultValue;
 }
 
@@ -105,6 +107,10 @@ const char* options::getStartTime() const {
 int options::execCommand() {
 	if(anyopt.getFlag("solve")) {
 		cmdSolve cmd;
+		return cmd.exec();
+	}
+	if(anyopt.getFlag("backdoor")) {
+		cmdBackdoor cmd;
 		return cmd.exec();
 	}
 	cout << "Error: No command specified." << endl;

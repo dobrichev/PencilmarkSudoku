@@ -155,7 +155,7 @@ struct complementaryPencilmarksX {
     	char* res = where;
 		for(int c = 0; c < 81; c++) {
 			for(int d = 0; d < 9; d++) {
-				*res = what[d].isBitSet(c) ? '.' : d + '1';
+				*res = (char)(what[d].isBitSet(c) ? '.' : d + '1');
 				res++;
 			}
 		}

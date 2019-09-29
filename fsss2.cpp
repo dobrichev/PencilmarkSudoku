@@ -342,6 +342,7 @@ template <class X> bool fsss2<X>::doLockedCandidatesForDigit(bm128& tmp) {
 				//unsolved line with candidates located only within this triplet
 				if(!db) {
 					tmp.clearBits(constraints::tripletMasks[lineBase + t].adjacentBox);
+					//fprintf(stderr, "B%2.2d %d\n", lineBase, t);
 					found = true;
 					//goto next_line;
 					return true;
@@ -354,6 +355,7 @@ template <class X> bool fsss2<X>::doLockedCandidatesForDigit(bm128& tmp) {
 					//if(!tmp.isDisjoint(constraints::tripletMasks[lineBase + t].self)) { //unsolved box
 					//if(1 || 0 != (unsolvedBoxes & (((uint32_t) 1) << (boxNum[line][t])))) {
 						tmp.clearBits(constraints::tripletMasks[lineBase + t].adjacentLine);
+						//fprintf(stderr, "L%2.2d %d\n", lineBase, t);
 						found = true;
 						//goto next_line;
 						return true;
@@ -899,8 +901,8 @@ nextGuess:
 		//At this point the existence of unsolved house(s) w/o candidates crashes the algorithm!!!
 
 		//Find an unsolved cell with less possibilities
-		int optDigit;
-		int optCell;
+		int optDigit = -1;
+		int optCell = -1;
 		int minCellValues = 2;
 		guessAuto = collector.beforeGuess(guessDepth, optCell, optDigit);
 
@@ -1269,8 +1271,8 @@ template < class X > void fsss2 < X > ::solve(const uint16_t* const in) {
 		y = (y | (y >> 2)) & 0x0f0f0f0f;
 		y = (y | (y >> 4)) & 0x00ff00ff;
 		y = (y | (y >> 8)) & 0x0000ffff;
-		grid[7].bitmap128.m128i_u8[i] = y;
-		grid[6].bitmap128.m128i_u8[i] = y >> 8;
+		grid[7].bitmap128.m128i_u8[i] = (uint8_t)y;
+		grid[6].bitmap128.m128i_u8[i] = (uint8_t)(y >> 8);
 
 		x.shl16(1);
 		y = x.mask8(); //bits for value 6
@@ -1280,8 +1282,8 @@ template < class X > void fsss2 < X > ::solve(const uint16_t* const in) {
 		y = (y | (y >> 2)) & 0x0f0f0f0f;
 		y = (y | (y >> 4)) & 0x00ff00ff;
 		y = (y | (y >> 8)) & 0x0000ffff;
-		grid[5].bitmap128.m128i_u8[i] = y;
-		grid[4].bitmap128.m128i_u8[i] = y >> 8;
+		grid[5].bitmap128.m128i_u8[i] = (uint8_t)y;
+		grid[4].bitmap128.m128i_u8[i] = (uint8_t)(y >> 8);
 
 		x.shl16(1);
 		y = x.mask8(); //bits for value 4
@@ -1291,8 +1293,8 @@ template < class X > void fsss2 < X > ::solve(const uint16_t* const in) {
 		y = (y | (y >> 2)) & 0x0f0f0f0f;
 		y = (y | (y >> 4)) & 0x00ff00ff;
 		y = (y | (y >> 8)) & 0x0000ffff;
-		grid[3].bitmap128.m128i_u8[i] = y;
-		grid[2].bitmap128.m128i_u8[i] = y >> 8;
+		grid[3].bitmap128.m128i_u8[i] = (uint8_t)y;
+		grid[2].bitmap128.m128i_u8[i] = (uint8_t)(y >> 8);
 
 		x.shl16(1);
 		y = x.mask8(); //bits for value 2
@@ -1300,7 +1302,7 @@ template < class X > void fsss2 < X > ::solve(const uint16_t* const in) {
 		y = (y | (y >> 2)) & 0x0f0f0f0f;
 		y = (y | (y >> 4)) & 0x00ff00ff;
 		//y = (y | (y >> 8)) & 0x0000ffff;
-		grid[1].bitmap128.m128i_u8[i] = y;
+		grid[1].bitmap128.m128i_u8[i] = (uint8_t)y;
 
 		x.shl16(1);
 		y = x.mask8(); //bits for values 1 and 9
@@ -1310,21 +1312,21 @@ template < class X > void fsss2 < X > ::solve(const uint16_t* const in) {
 		y = (y | (y >> 2)) & 0x0f0f0f0f;
 		y = (y | (y >> 4)) & 0x00ff00ff;
 		y = (y | (y >> 8)) & 0x0000ffff;
-		grid[0].bitmap128.m128i_u8[i] = y;
-		grid[8].bitmap128.m128i_u8[i] = y >> 8;
+		grid[0].bitmap128.m128i_u8[i] = (uint8_t)y;
+		grid[8].bitmap128.m128i_u8[i] = (uint8_t)(y >> 8);
 	}
 	//now the last cell
 	y = in[80];
 	if(y != 511) {
-		grid[0].bitmap128.m128i_u8[10] = (y >> 0) & 1;
-		grid[1].bitmap128.m128i_u8[10] = (y >> 1) & 1;
-		grid[2].bitmap128.m128i_u8[10] = (y >> 2) & 1;
-		grid[3].bitmap128.m128i_u8[10] = (y >> 3) & 1;
-		grid[4].bitmap128.m128i_u8[10] = (y >> 4) & 1;
-		grid[5].bitmap128.m128i_u8[10] = (y >> 5) & 1;
-		grid[6].bitmap128.m128i_u8[10] = (y >> 6) & 1;
-		grid[7].bitmap128.m128i_u8[10] = (y >> 7) & 1;
-		grid[8].bitmap128.m128i_u8[10] = (y >> 8) & 1;
+		grid[0].bitmap128.m128i_u8[10] = (uint8_t)((y >> 0) & 1);
+		grid[1].bitmap128.m128i_u8[10] = (uint8_t)((y >> 1) & 1);
+		grid[2].bitmap128.m128i_u8[10] = (uint8_t)((y >> 2) & 1);
+		grid[3].bitmap128.m128i_u8[10] = (uint8_t)((y >> 3) & 1);
+		grid[4].bitmap128.m128i_u8[10] = (uint8_t)((y >> 4) & 1);
+		grid[5].bitmap128.m128i_u8[10] = (uint8_t)((y >> 5) & 1);
+		grid[6].bitmap128.m128i_u8[10] = (uint8_t)((y >> 6) & 1);
+		grid[7].bitmap128.m128i_u8[10] = (uint8_t)((y >> 7) & 1);
+		grid[8].bitmap128.m128i_u8[10] = (uint8_t)((y >> 8) & 1);
 	}
 
 //	//debug
@@ -1466,7 +1468,7 @@ bool isIrreducible::solve(const char* p) {
 			continue;
 		}
 		pos[nGivens++] = c;
-		valBM[c] = 1 << (p[c] - 1);
+		valBM[c] = (uint16_t)(1 << (p[c] - 1));
 		if(++dc[p[c] - 1] > 6)
 			return false; //this works for 36+ givens
 	}
@@ -1489,7 +1491,7 @@ bool isIrreducible::solutionFound() {
 
 void getSingleSolution::setCellValue(int cell, int val) {
 	if(nsol) return; //store only the first solution
-	resChar[cell] = val;
+	resChar[cell] = (char)val;
 }
 bool getSingleSolution::solutionFound() {
 	return (++nsol == 2); //stop after possible second solution
@@ -1515,7 +1517,7 @@ bool singleSolutionGuesses::beforeGuess(int guessDepth, int &optCell, int &optDi
 }
 void singleSolutionGuesses::setCellValue(int cell, int val) {
 	if(nsol) return; //store only the first solution
-	resChar[cell] = val;
+	resChar[cell] = (char)val;
 }
 bool singleSolutionGuesses::solutionFound() {
 	return (++nsol == 2); //stop after possible second solution
@@ -1544,7 +1546,7 @@ int singleSolutionGuesses::solve(const pencilmarks& forbiddenValuePositions, cha
 }
 
 void getTwoSolutions::setCellValue(int cell, int val) {
-	resChar[cell] = val;
+	resChar[cell] = (char)val;
 }
 bool getTwoSolutions::solutionFound() {
 	if(nsol == 0) {
@@ -1592,7 +1594,7 @@ int getAnySolution::solve(const pencilmarks& forbiddenValuePositions, char* res)
 }
 
 void multiSolutionPM::setCellValue(int cell, int val) {
-	sol[cell] = val;
+	sol[cell] = (char)val;
 }
 bool multiSolutionPM::solutionFound() {
 	for(int c = 0; c < 81; c++) {
@@ -1741,7 +1743,7 @@ bool patEnum::beforeGuess(int guessDepth, int &optCell, int &optDigit) {
 				//lucky!
 				char ppp[88];
 				for(int i = 0; i < 81; i++) {
-					ppp[i] = pp[i] ? pp[i] + '0' : '.';
+					ppp[i] = (char)(pp[i] ? pp[i] + '0' : '.');
 				}
 				fprintf(stdout, "%81.81s\n", ppp);
 				fflush(NULL);
@@ -1773,7 +1775,7 @@ bool patEnum::beforeGuess(int guessDepth, int &optCell, int &optDigit) {
 	optCell = chosenGuessCell[curGuessDepth];
 	optDigit = bm128::FindLSBIndex32(cellCandidates[curGuessDepth]);
 	cellCandidates[curGuessDepth] ^= (1 << optDigit); //exclude this value from later iterations
-	pp[optCell] = optDigit + 1; //save it for later checking and output
+	pp[optCell] = (char)(optDigit + 1); //save it for later checking and output
 	usedValues[curGuessDepth + 1] = usedValues[curGuessDepth] | (1 << optDigit);
 	//fprintf(stderr, "(%d:%d=%d%s)\n", curGuessDepth, optCell, pp[optCell], cellCandidates[curGuessDepth] ? "" : ", last"); //debug
 	return false; //enforce the solver to guess this cell/digit

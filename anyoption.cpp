@@ -148,7 +148,7 @@ AnyOption::alloc()
 	if( mem_allocated )
 		return true;
 
-	size = (max_options+1) * sizeof(const char*);
+	size = (max_options+1) * (int)sizeof(const char*);
 	options = (const char**)malloc( size );	
 	optiontype = (int*) malloc( (max_options+1)*sizeof(int) );	
 	optionindex = (int*) malloc( (max_options+1)*sizeof(int) );	
@@ -177,7 +177,7 @@ AnyOption::alloc()
 		optcharindex[i] = -1 ;
 	}
 
-	size = (max_usage_lines+1) * sizeof(const char*) ;
+	size = (max_usage_lines+1) * (int)sizeof(const char*) ;
 	usage = (const char**) malloc( size );
 
 	if( usage == NULL  ){
@@ -763,7 +763,7 @@ AnyOption::valueStoreOK( )
 	int size= 0;
 	if( !set ){
 		if( g_value_counter > 0 ){
-			size = g_value_counter * sizeof(char*);
+			size = g_value_counter * (int)sizeof(char*);
 			values = (char**)malloc( size );	
 			for( int i = 0 ; i < g_value_counter ; i++)
 				values[i] = NULL;
@@ -776,7 +776,7 @@ AnyOption::valueStoreOK( )
 /*
  * public get methods 
  */
-char*
+const char*
 AnyOption::getValue( const char *option )
 {
 	if( !valueStoreOK() )
@@ -801,7 +801,7 @@ AnyOption::getFlag( const char *option )
 	return false;
 }
 
-char*
+const char*
 AnyOption::getValue( char option )
 {
 	if( !valueStoreOK() )

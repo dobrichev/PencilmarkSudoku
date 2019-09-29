@@ -12,9 +12,7 @@
 
 //commands
 #include "cmdSolve.h"
-
-//#include "fsss2.h"
-//#include "minimizer.h"
+#include "cmdBackdoor.h"
 
 class options {
 	AnyOption anyopt;
@@ -26,7 +24,7 @@ public:
 	int execCommand();
 	void printUsage();
 	const char* getValue(const char* key);
-	const int getIntValue(const char* key, const int defaultValue);
+	int getIntValue(const char* key, const int defaultValue);
 	bool getFlag(const char* key);
 	const char* getStartTime() const;
 };
