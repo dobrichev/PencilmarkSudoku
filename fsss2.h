@@ -66,6 +66,27 @@ struct pencilmarks {
 		}
 		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
 	}
+    bool fromChars729(const char *src) {
+    	clear();
+    	const char* s = src;
+		for(int c = 0; c < 81; c++) {
+			for(int d = 0; d < 9; d++) {
+				if(*s == '.' || *s == '0') pm[d].setBit(c);
+				else if(*s != d + '1') return false;
+				s++;
+			}
+		}
+    	return true;
+    }
+    void toChars729(char* dest) const {
+    	char* res = dest;
+		for(int c = 0; c < 81; c++) {
+			for(int d = 0; d < 9; d++) {
+				*res = pm[d].isBitSet(c) ? '.' : d + '1';
+				res++;
+			}
+		}
+    }
 };
 
 struct constraints {
