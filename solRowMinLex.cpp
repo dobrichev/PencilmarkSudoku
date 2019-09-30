@@ -20,7 +20,7 @@
 //This is a MODIFIED version of the original code
 
 #include <memory.h>
-#include "rowminlex.h"
+#include "solRowMinLex.h"
 
 const solRowMinLex::transformationConstants solRowMinLex::tc =
 {

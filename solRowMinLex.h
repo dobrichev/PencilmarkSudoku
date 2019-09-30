@@ -21,7 +21,7 @@
 
 #ifndef ROWMINLEX_H_INCLUDED
 
-#define ROWMINLEX_H_INCLUDED
+#define SOLROWMINLEX_H_INCLUDED
 
 #include <memory.h>
 #include "t_128.h"
@@ -100,4 +100,4 @@ struct solRowMinLex
 	}
 	static void pmMinLex(const pencilmarks& src, const char* sol, pencilmarks& res);
 };
-#endif // ROWMINLEX_H_INCLUDED
+#endif // SOLROWMINLEX_H_INCLUDED

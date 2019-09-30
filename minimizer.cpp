@@ -1,3 +1,4 @@
+
 #if 1
 #include <vector>
 #include <set>
@@ -8,7 +9,7 @@
 #include <random>
 #include <experimental/algorithm> //gcc-specific
 #include "minimizer.h"
-#include "rowminlex.h"
+#include "solRowMinLex.h"
 #include "fsss2.h"
 
 void minimizer::minimizeVanilla(char *puz) {
