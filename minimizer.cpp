@@ -383,11 +383,11 @@ void minimizer::transformM2P2(const char* p) {
 	if(!src.fromChars2(p)) return; //silently ignore invalid inputs
 	transformM2P2(src.forbiddenValuePositions); //do the job
 }
-void minimizer::solRowMinLex(const char* p) {
-	complementaryPencilmarksX src;
-	if(!src.fromChars2(p)) return; //silently ignore invalid inputs
-	solRowMinLex(src.forbiddenValuePositions); //do the job
-}
+//void minimizer::solRowMinLex(const char* p) {
+//	complementaryPencilmarksX src;
+//	if(!src.fromChars2(p)) return; //silently ignore invalid inputs
+//	solRowMinLex(src.forbiddenValuePositions); //do the job
+//}
 void minimizer::tryReduceM1(const char* p) {
 	complementaryPencilmarksX src;
 	if(!src.fromChars2(p)) return; //silently ignore invalid inputs
@@ -654,7 +654,7 @@ void minimizer::reduceM2P1(pencilmarks& forbiddenValuePositions) { // ~1 second/
 					//numSolverCalls++;
 					if(1 == numSolutions) {
 						exchangable[d][c][d1].setBit(c1); // forbidden at {d1, c1} is exchangable with {d2, c2}
-						solRowMinLex(forbiddenValuePositions, sol); // export {-1,+1} NOTE: This exports non-minimals!!!
+						printRowMinLex(forbiddenValuePositions, sol); // export {-1,+1} NOTE: This exports non-minimals!!!
 					}
 #ifdef COUNT_TRIALS
 					if(maxTrialsSoFar < nTrials) {
@@ -716,7 +716,7 @@ void minimizer::reduceM2P1(pencilmarks& forbiddenValuePositions) { // ~1 second/
 #endif
 					if(1 == numSolutions) {
 						//lucky
-						solRowMinLex(forbiddenValuePositions, sol); // export {-2,+1}
+						printRowMinLex(forbiddenValuePositions, sol); // export {-2,+1}
 						//complementaryPencilmarksX::dump2(forbiddenValuePositions); // export {-2,+1}
 						fprintf(stderr, "+");
 					}
@@ -804,7 +804,7 @@ void minimizer::reduceM2P1v2(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 						//lucky
 						redundantsAlone[allow1].skip = true; //don't export {-1,+1} later because it has redundant
 						redundantsAlone[allow2].skip = true; //don't export {-1,+1} later because it has redundant
-						solRowMinLex(forbiddenValuePositions, sol.sol); // export {-2,+1}
+						printRowMinLex(forbiddenValuePositions, sol.sol); // export {-2,+1}
 						fprintf(stderr, "+");
 					}
 					forbiddenValuePositions[redundantsAlone[allow2].digit].setBit(redundantsAlone[allow2].cell); //forbid
@@ -815,7 +815,7 @@ void minimizer::reduceM2P1v2(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 			for(int allow1 = 0; allow1 < numRedundantsAlone; allow1++) {
 				if(redundantsAlone[allow1].skip) continue; //part of {-2,+1}
 				forbiddenValuePositions[redundantsAlone[allow1].digit].clearBit(redundantsAlone[allow1].cell); //allow
-				solRowMinLex(forbiddenValuePositions, redundantsAlone[allow1].sol.sol); // export {-1,+1}
+				printRowMinLex(forbiddenValuePositions, redundantsAlone[allow1].sol.sol); // export {-1,+1}
 				forbiddenValuePositions[redundantsAlone[allow1].digit].setBit(redundantsAlone[allow1].cell); //forbid
 			}
 			forbiddenValuePositions[dForbid].clearBit(cForbid); // restore
@@ -919,7 +919,7 @@ void minimizer::reduceM2P1v3(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 						//lucky
 						redundantsAlone[dForbid][cForbid].rc[allow1].skip = true; //don't export {-1,+1} later because it has redundant
 						redundantsAlone[dForbid][cForbid].rc[allow2].skip = true; //don't export {-1,+1} later because it has redundant
-						solRowMinLex(forbiddenValuePositions, sol.sol); // export {-2,+1}
+						printRowMinLex(forbiddenValuePositions, sol.sol); // export {-2,+1}
 						fprintf(stderr, "+");
 					}
 					forbiddenValuePositions[redundantsAlone[dForbid][cForbid].rc[allow2].digit].setBit(redundantsAlone[dForbid][cForbid].rc[allow2].cell); //restore
@@ -930,7 +930,7 @@ void minimizer::reduceM2P1v3(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 			for(int allow1 = 0; allow1 < redundantsAlone[dForbid][cForbid].size; allow1++) {
 				if(redundantsAlone[dForbid][cForbid].rc[allow1].skip) continue; //part of {-2,+1}
 				forbiddenValuePositions[redundantsAlone[dForbid][cForbid].rc[allow1].digit].clearBit(redundantsAlone[dForbid][cForbid].rc[allow1].cell); //allow
-				solRowMinLex(forbiddenValuePositions, redundantsAlone[dForbid][cForbid].rc[allow1].sol.sol); // export {-1,+1}
+				printRowMinLex(forbiddenValuePositions, redundantsAlone[dForbid][cForbid].rc[allow1].sol.sol); // export {-1,+1}
 				forbiddenValuePositions[redundantsAlone[dForbid][cForbid].rc[allow1].digit].setBit(redundantsAlone[dForbid][cForbid].rc[allow1].cell); //restore
 			}
 			forbiddenValuePositions[dForbid].clearBit(cForbid); // restore
@@ -1037,7 +1037,7 @@ void minimizer::reduceM2P1v4(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 						//lucky
 						a1->skip = true;
 						a2->skip = true;
-						solRowMinLex(forbiddenValuePositions, sol.sol); // export {-2,+1}
+						printRowMinLex(forbiddenValuePositions, sol.sol); // export {-2,+1}
 						fprintf(stderr, "+");
 					}
 				forbiddenValuePositions[dAllow2].setBit(cAllow2); // restore
@@ -1060,7 +1060,7 @@ void minimizer::reduceM2P1v4(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 			int cAllow1 = a1->cell;
 			forbiddenValuePositions[dAllow1].clearBit(cAllow1); // allow
 			if(sameSolution) {
-				solRowMinLex(forbiddenValuePositions, a1->sol.sol); // export {-1,+1}
+				printRowMinLex(forbiddenValuePositions, a1->sol.sol); // export {-1,+1}
 			}
 			else {
 				//different solution grid can cause non-minimals here
@@ -1084,7 +1084,7 @@ void minimizer::tryReduceM1(pencilmarks& forbiddenValuePositions) { //output all
 			if(!forbiddenValuePositions[d1].isBitSet(c1)) continue; //skip allowed placements
 			if(redundantTester.solve(forbiddenValuePositions, d1, c1)) {
 				forbiddenValuePositions[d1].clearBit(c1); //allow
-				solRowMinLex(forbiddenValuePositions, sol); // export {-1,+1}
+				printRowMinLex(forbiddenValuePositions, sol); // export {-1,+1}
 				forbiddenValuePositions[d1].setBit(c1); //restore
 				hasReduced = true;
 			}
@@ -1094,7 +1094,7 @@ void minimizer::tryReduceM1(pencilmarks& forbiddenValuePositions) { //output all
 		fprintf(stderr, "-");
 	}
 	else {
-		solRowMinLex(forbiddenValuePositions, sol); // export original
+		printRowMinLex(forbiddenValuePositions, sol); // export original
 	}
 }
 void minimizer::transformM1P1(pencilmarks& forbiddenValuePositions) {
@@ -1432,29 +1432,27 @@ void minimizer::transformM2P2(pencilmarks& forbiddenValuePositions) { //full sca
 	double tt = ((double)(finish - start)) / CLOCKS_PER_SEC;
 	fprintf(stderr, "\t%d,%2.3fs,%dK/s(%d/%d)\n", numSolverCalls, tt, (int)(numSolverCalls / tt / 1000), p1valid, p1invalid);
 }
-void minimizer::solRowMinLex(const pencilmarks& src) { //transform single-solution puzzle to row-min-lex by solution grid
+//void minimizer::solRowMinLex(const pencilmarks& src) { //transform single-solution puzzle to row-min-lex by solution grid
+//	pencilmarks res;
+//	if(solRowMinLex(src, res)) {
+//		complementaryPencilmarksX::dump2(res);
+//	}
+//}
+//bool minimizer::solRowMinLex(const pencilmarks& src, pencilmarks& res) { //transform single-solution puzzle to row-min-lex by solution grid
+//	getAnySolution solver;
+//	char sol[88];
+//	if(0 == solver.solve(src, sol)) return false; //ignore invalid puzzles
+//	solRowMinLex(src, res, sol);
+//	return true;
+//}
+//void minimizer::solRowMinLex(const pencilmarks& src, pencilmarks& res, const char* sol) { //transform single-solution puzzle to row-min-lex by solution grid
+//	transformer tr;
+//	tr.byGrid(sol);
+//	tr.transform(src, res);
+//}
+void minimizer::printRowMinLex(const pencilmarks& src, const char* sol) { //transform single-solution puzzle to row-min-lex by solution grid
 	pencilmarks res;
-	if(solRowMinLex(src, res)) {
-		complementaryPencilmarksX::dump2(res);
-	}
-}
-bool minimizer::solRowMinLex(const pencilmarks& src, pencilmarks& res) { //transform single-solution puzzle to row-min-lex by solution grid
-	getAnySolution solver;
-	char sol[88];
-	if(0 == solver.solve(src, sol)) return false; //ignore invalid puzzles
-	solRowMinLex(src, res, sol);
-	return true;
-}
-void minimizer::solRowMinLex(const pencilmarks& src, pencilmarks& res, const char* sol) { //transform single-solution puzzle to row-min-lex by solution grid
-	transformer tr;
-	tr.byGrid(sol);
-	tr.transform(src, res);
-}
-void minimizer::solRowMinLex(const pencilmarks& src, const char* sol) { //transform single-solution puzzle to row-min-lex by solution grid
-	pencilmarks res;
-	transformer tr;
-	tr.byGrid(sol);
-	tr.transform(src, res);
+	solRowMinLex::pmMinLex(src, sol, res);
 	complementaryPencilmarksX::dump2(res);
 }
 void minimizer::guessCounters(const char* p) { //puzzle in 729-columns format, solution, totalNumGuesses, numGuesses[0] ...

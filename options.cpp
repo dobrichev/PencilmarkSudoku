@@ -41,7 +41,7 @@ options::options() {
 
 	anyopt.addUsage(" --backdoor          Print backdoors size & exemplar");
 	anyopt.setCommandFlag("backdoor");
-	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks) (not impl.)");
+	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	//anyopt.setCommandFlag("vanilla");
 
 	anyopt.addUsage("");

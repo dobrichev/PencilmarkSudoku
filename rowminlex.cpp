@@ -22,7 +22,7 @@
 #include <memory.h>
 #include "rowminlex.h"
 
-const transformer::transformationConstants transformer::tc =
+const solRowMinLex::transformationConstants solRowMinLex::tc =
 {
 	{ /* swap */
 		{ // 0
@@ -248,7 +248,7 @@ const transformer::transformationConstants transformer::tc =
 	}
 };
 
-void transformer::byGrid(const char* sol)
+void solRowMinLex::byGrid(const char* sol)
 {
 	register int			b;
 	register int			d;
@@ -261,7 +261,7 @@ void transformer::byGrid(const char* sol)
 	int				pr;
 	int				pc;
 
-	transformer test;
+	solRowMinLex test;
 
 	/* initialize the worst canonical candidate */
 	aut = 1;
@@ -508,7 +508,7 @@ next:
 	map[0] = 0;
 }
 
-void transformer::transform(const pencilmarks& in, pencilmarks& out) const {
+void solRowMinLex::transform(const pencilmarks& in, pencilmarks& out) const {
 	for(int d = 0; d < 9; d++) {
 		out[d].clear();
 	}
@@ -532,7 +532,7 @@ void transformer::transform(const pencilmarks& in, pencilmarks& out) const {
 	}
 }
 
-void transformer::transform(const char *in, char *out) const {
+void solRowMinLex::transform(const char *in, char *out) const {
 	char* s = out;
 	bool isPuzzle = false;
 	for(int r = 0; r < 9; r++) {
@@ -560,7 +560,7 @@ void transformer::transform(const char *in, char *out) const {
 	}
 }
 
-void transformer::reverseTransform(const char *in, char *out) const {
+void solRowMinLex::reverseTransform(const char *in, char *out) const {
 	int labelMap[10];
 	for(int i = 0; i < 10; i++) {
 		labelMap[map[i]] = i;
@@ -570,6 +570,12 @@ void transformer::reverseTransform(const char *in, char *out) const {
 			out[tc.swap[box][row[r]][col[c]]] = (char)labelMap[(int)in[9 * r + c]];
 		}
 	}
+}
+
+void solRowMinLex::pmMinLex(const pencilmarks& src, const char* sol, pencilmarks& res) { //transform single-solution puzzle to row-min-lex by solution grid
+	solRowMinLex tr;
+	tr.byGrid(sol);
+	tr.transform(src, res);
 }
 
 //void rowminlex(const char *in, char *out) {

@@ -225,8 +225,8 @@ struct minimizer {
 	void solRowMinLex(const pencilmarks& src, pencilmarks& res, const char* sol);
 	bool solRowMinLex(const pencilmarks& src, pencilmarks& res); //transform single-solution puzzle to row-min-lex by solution grid
 	void solRowMinLex(const pencilmarks& src); //transform single-solution puzzle to row-min-lex by solution grid
-	void solRowMinLex(const char *p); //string as input
-	void solRowMinLex(const pencilmarks& src, const char* sol);
+	//void solRowMinLex(const char *p); //string as input
+	void printRowMinLex(const pencilmarks& src, const char* sol);
 
 	void guessCounters(const char *p); //string as input
 	void backdoorSize(const char *p); //string as input

@@ -35,7 +35,7 @@
 #define NOINLINE
 #endif
 
-struct transformer
+struct solRowMinLex
 {
 	struct transformationConstants
 	{
@@ -44,14 +44,14 @@ struct transformer
 		unsigned char	part[9][5];
 		unsigned char	boxOffset[9];
 	};
-	static const transformer::transformationConstants tc;
+	static const solRowMinLex::transformationConstants tc;
 
 	unsigned int	box;
 	unsigned int	map[10];
 	unsigned int	row[9];
 	unsigned int	col[9];
 	unsigned int	aut;
-	transformer *next; //0 terminated chain of automorphic transformations for aut > 1
+	solRowMinLex *next; //0 terminated chain of automorphic transformations for aut > 1
 
 	void byGrid(const char* sol);
 	//void byPuzzle(const char* sol);
@@ -59,25 +59,25 @@ struct transformer
 	void transform(const pencilmarks& in, pencilmarks& out) const;
 	void reverseTransform(const char *in, char *out) const;
 	//void toString(char *buf) const;
-	transformer() : box(0), aut(0) {
+	solRowMinLex() : box(0), aut(0) {
 		next = 0;
 	}
-	const transformer & operator=(const transformer &t) {
-		memcpy((transformer*)this, &t, sizeof(transformer));
+	const solRowMinLex & operator=(const solRowMinLex &t) {
+		memcpy((solRowMinLex*)this, &t, sizeof(solRowMinLex));
 		if(t.next) {
-			transformer *t = new transformer();
+			solRowMinLex *t = new solRowMinLex();
 			*t = *next;
 			next = t;
 		}
 		return *this;
 	}
-	~transformer() {
+	~solRowMinLex() {
 		if(next) {
 			delete next;
 		}
 	}
-	NOINLINE void addAutomorph(transformer *test) {
-		transformer *t = new transformer();
+	NOINLINE void addAutomorph(solRowMinLex *test) {
+		solRowMinLex *t = new solRowMinLex();
 		*t = *test;
 		t->map[0] = 0;
 		t->next = next; //???
@@ -98,5 +98,6 @@ struct transformer
 		if(map[9] != 9) return true;
 		return false;
 	}
+	static void pmMinLex(const pencilmarks& src, const char* sol, pencilmarks& res);
 };
 #endif // ROWMINLEX_H_INCLUDED
