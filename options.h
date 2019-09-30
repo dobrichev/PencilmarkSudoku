@@ -13,6 +13,7 @@
 //commands
 #include "cmdSolve.h"
 #include "cmdBackdoor.h"
+#include "transform.h"
 
 class options {
 	AnyOption anyopt;

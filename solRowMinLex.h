@@ -19,7 +19,7 @@
 		***********************************************************************/
 //This is a MODIFIED version of the original code
 
-#ifndef ROWMINLEX_H_INCLUDED
+#ifndef SOLROWMINLEX_H_INCLUDED
 
 #define SOLROWMINLEX_H_INCLUDED
 

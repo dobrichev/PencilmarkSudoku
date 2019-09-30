@@ -44,6 +44,11 @@ options::options() {
 	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	//anyopt.setCommandFlag("vanilla");
 
+	anyopt.addUsage(" --solrowminlex      Transform valid puzzle to its solution lexicographically minimal row morph");
+	anyopt.setCommandFlag("solrowminlex");
+	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
+	//anyopt.setCommandFlag("vanilla");
+
 	anyopt.addUsage("");
 
 	//by default all  options  will be checked on the command line and from option/resource file
@@ -112,6 +117,9 @@ int options::execCommand() {
 	if(anyopt.getFlag("backdoor")) {
 		cmdBackdoor cmd;
 		return cmd.exec();
+	}
+	if(anyopt.getFlag("solrowminlex")) {
+		return transform::cmdSolRowMinLex();
 	}
 	cout << "Error: No command specified." << endl;
 	return -1;
