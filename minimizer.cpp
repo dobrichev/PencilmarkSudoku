@@ -134,11 +134,6 @@ void minimizer::minimizePencilmarks(char *puz) {
 	int numPencilmarks = 81 * 9;
 	int numPasses = 0;
 	char sol[256];
-//	{
-//		hasSingleSolution ss;
-//		if(1 != ss.solve(puz))
-//			return; //silently ignore invalid or multiple-solution puzzles
-//	}
 	{
 		getSingleSolution ss;
 		int nSol = ss.solve(puz, sol);
@@ -147,11 +142,6 @@ void minimizer::minimizePencilmarks(char *puz) {
 			return; //silently ignore invalid or multiple-solution puzzles
 		}
 	}
-
-//	std::vector<complementaryPencilmarksX> prevPass;
-//	std::vector<complementaryPencilmarksX> curPass;
-//	prevPass.reserve(65000);
-//	curPass.reserve(65000);
 
 	std::set<complementaryPencilmarksX> previousPass;
 	std::set<complementaryPencilmarksX> currentPass;
@@ -173,12 +163,9 @@ void minimizer::minimizePencilmarks(char *puz) {
 		}
 		numPencilmarks -= 8;
 	}
-	//prevPass.push_back(original); //all initial constraints, known non-redundant constrains only for initial givens that must survive for the solution
 	previousPass.insert(original); //all initial constraints, known non-redundant constrains only for initial givens that must survive for the solution
 
 	isRedundant redundancyTester;
-
-	//original.dump();
 
 	do { //while the previous pass returns puzzles do a next pass
 		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
@@ -187,26 +174,17 @@ void minimizer::minimizePencilmarks(char *puz) {
 			for(int currCell = 80; currCell >=0; currCell--) { //iterate cells in reverse order
 				if(!original.isForRemoval(currDigit, currCell))
 					continue; //we wouldn't find this position within the parents' list
-				//for(auto parent : prevPass) {
 				for(auto& parent : previousPass) {
-					//if((parent->aliveGivensMask & currGivenBit) && !(parent->knownNonRedundantsMask & currGivenBit)) { //not already removed and not marked as "don't remove"
 					if(parent.isForRemoval(currDigit, currCell)) { //not already removed and not marked as "don't remove"
 						//check whether the constraints combination is previously processed in the same pass
 						complementaryPencilmarksX current;
 						current.getReducedForbiddensFrom(parent, currDigit, currCell); //copy parent, then allow currDigit on currCell
-						//if(std::binary_search(curPass.begin(), curPass.end(), current)) {
-//						if(currentPass.find(current) != currentPass.end()) {
-//							//already processed
-//							//printf("f");
-//							continue;
-//						}
 						//check whether the currGiven is redundant in this context
 						{
 							if(redundancyTester.solve(current.forbiddenValuePositions, currDigit, currCell)) {
 								//the currGiven is redundant in the context of the parent
 								current.getFixedFrom(parent);
 								current.markAsFixed(currDigit, currCell);
-								//curPass.push_back(current); //store it to avoid duplicate processing later in this pass
 								currentPass.insert(current); //store it to avoid duplicate processing later in this pass
 								if(current.isMinimal()) {
 									//there are no more givens to remove => current is a minimal puzzle
@@ -214,10 +192,8 @@ void minimizer::minimizePencilmarks(char *puz) {
 									numMinimals++;
 									if(!current.isMinimalUniqueDoubleCheck(sol)) return;
 									printf("\n");
-									//current.dump1(current.forbiddenValuePositions, true);
 									current.dump2();
 								}
-								//if(curPass.size() >= 1000) goto next_pass; //memory overflow
 							}
 							else {
 								const_cast<complementaryPencilmarksX&>(parent).markAsFixed(currDigit, currCell); //mark the clue as known non-redundant in this context to avoid duplicate checking later
@@ -227,7 +203,6 @@ void minimizer::minimizePencilmarks(char *puz) {
 									numMinimals++;
 									if(!parent.isMinimalUniqueDoubleCheck(sol)) return;
 									printf("\n");
-									//parent.dump1(parent.forbiddenValuePositions, true);
 									parent.dump2();
 								}
 								continue; //continue with next parent
@@ -240,32 +215,9 @@ void minimizer::minimizePencilmarks(char *puz) {
 				} //parent
 			} //cell
 		} //digit
-		//next_pass:;
 		previousPass.clear();
-		//std::experimental::sample(std::begin(currentPass), std::end(currentPass), std::inserter(previousPass, previousPass.end()), 5, std::mt19937{/*std::random_device{}()*/}); //gcc-specific
 		std::experimental::sample(std::begin(currentPass), std::end(currentPass), std::inserter(previousPass, previousPass.end()), 100, rg); //gcc-specific
 		currentPass.clear();
-//		//prevPass.clear();
-//		//prevPass.swap(curPass); //move all (= overflow)
-//		{ //random sample
-//			// NOTE: at this point we are throwing away some possibly minimized (but not identified as minimal) puzzles from curPass!
-//			//prevPass.swap(curPass);
-//			//std::experimental::sample(std::begin(curPass), std::end(curPass), std::back_inserter(prevPass), 10, std::mt19937{std::random_device{}()}); //gcc-specific
-//			//if(!std::is_sorted(std::begin(curPass), std::end(curPass))) { //debug
-//			//	printf("\ncurPass not sorted\n");
-//			//}
-//			std::experimental::sample(std::begin(curPass), std::end(curPass), std::back_inserter(prevPass), 10, std::mt19937{std::random_device{}()}); //gcc-specific
-//			curPass.clear();
-//			if(!std::is_sorted(std::begin(prevPass), std::end(prevPass))) { //debug
-//				std::sort(std::begin(prevPass), std::end(prevPass));
-//				//printf("\nnot sorted\n");
-//				auto last = std::unique(prevPass.begin(), prevPass.end()); //debug
-//				if(last != prevPass.end()) { //debug
-//					prevPass.erase(last, prevPass.end());
-//					printf("\nnot unique\n");
-//				}
-//			}
-//		}
 		fflush(NULL);
 	} while(!previousPass.empty());
 	printf("\nMinimals found = %lu\n", numMinimals);

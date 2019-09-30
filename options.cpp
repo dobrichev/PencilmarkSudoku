@@ -32,7 +32,7 @@ options::options() {
 	anyopt.setCommandFlag("groupbygrid");
 	anyopt.addUsage("     --gridsonly             Prints ordered solution grids w/o duplicates (not impl.)");
 	anyopt.setFlag("gridsonly");
-	anyopt.addUsage("   --minimals            Check puzzles for minimality (not impl.)");
+	anyopt.addUsage("   --minimals            Check puzzles for minimality");
 	anyopt.setFlag("minimals");
 	anyopt.addUsage("   --count               Print only the solution count (not impl.)");
 	anyopt.setFlag("count");

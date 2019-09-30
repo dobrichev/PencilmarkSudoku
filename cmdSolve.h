@@ -8,6 +8,8 @@
 #ifndef CMDSOLVE_H_
 #define CMDSOLVE_H_
 
+#include "pencilmarks.h"
+
 /*
  --solve             Solve puzzles
    --groupbygrid         Normalized puzzles grouped by solution
@@ -29,6 +31,7 @@ private:
 public:
 	cmdSolve();
 	int exec();
+	static void getFirstRedundantConstraint(const char* sol, const pencilmarks& forbiddenValuePositions, int& val, int& cell);
 };
 
 #endif /* CMDSOLVE_H_ */

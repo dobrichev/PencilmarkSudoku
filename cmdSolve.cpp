@@ -20,6 +20,7 @@ cmdSolve::cmdSolve() {
 	maxSolutionCount = opt.getIntValue("maxsolutioncount", INT_MAX);
 }
 int cmdSolve::exec() {
+	int ret = 0;
 	char line[2000];
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
@@ -27,20 +28,55 @@ int cmdSolve::exec() {
 		char sol[88];
 		char outPuz[729];
 		if(vanilla) {
-			char p[81];
-			for(int i = 0; i < 81; i++) p[i] = (char)(line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
-			if(1 != ss.solve(p, sol)) return 1;
+			pm.fromChars81(line);
 		}
 		else {
-			if(!pm.fromChars729(line)) return 1;
-			if(1 != ss.solve(pm, sol)) return 1;
+			if(!pm.fromChars729(line)) {
+				ret = 1;
+				continue;
+			}
+		}
+		if(1 != ss.solve(pm, sol)) {
+			ret = 1;
+			continue;
 		}
 		pm.toChars729(outPuz);
 		for(int i = 0; i < 81; i++) {
 			sol[i] += '0';
 		}
-		printf("%729.729s\t%81.81s\n", outPuz, sol);
+		if(minimals) {
+			int val = -1;
+			int cell;
+			getFirstRedundantConstraint(sol, pm, val, cell);
+			if(val == -1) {
+				printf("%729.729s\t%81.81s\tMinimal\n", outPuz, sol);
+			}
+			else {
+				printf("%729.729s\t%81.81s\tRedundant(val=%d,pos=%d)\n", outPuz, sol, val, cell);
+			}
+		}
+		else {
+			printf("%729.729s\t%81.81s\n", outPuz, sol);
+		}
 	}
-	return 0;
+	return ret;
 }
+void cmdSolve::getFirstRedundantConstraint(const char* sol, const pencilmarks& forbiddenValuePositions, int& val, int& cell) {
+	hasSingleSolution sss;
+	for(int d = 0; d < 9; d++) {
+		for(int c = 0; c < 81; c++) {
+			if(forbiddenValuePositions[d].isBitSet(c)) {
+				//try removal of this pencilmark and see whether it causes 2+ solutions
+				pencilmarks m1(forbiddenValuePositions);
+				m1[d].clearBit(c);
+				if(2 != sss.solve(m1)) {
+					val = d + 1;
+					cell = c;
+					return;
+				}
+			}
+		}
+	}
+}
+
 
