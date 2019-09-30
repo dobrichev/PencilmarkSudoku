@@ -94,7 +94,9 @@ public:
 	uint32_t guessDepth;
 
 #ifdef USE_LOCKED_CANDIDATES
+#ifndef LOCKED_CANDIDATES_ALWAYS
 	int lockedDone;
+#endif
 #endif
 
 #ifdef USE_SUBSETS

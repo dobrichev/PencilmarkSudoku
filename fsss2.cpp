@@ -1667,7 +1667,9 @@ bool patEnum::beforeGuess(int guessDepth, int &optCell, int &optDigit) {
 	if(guessDepth >= size) return true; //all cells of interest are set
 
 #ifdef USE_LOCKED_CANDIDATES
+#ifndef LOCKED_CANDIDATES_ALWAYS
 	solver.lockedDone = 0;
+#endif
 #endif //USE_LOCKED_CANDIDATES
 
 #ifdef USE_SUBSETS
