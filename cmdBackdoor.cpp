@@ -17,7 +17,12 @@ int cmdBackdoor::exec() {
 	char line[2000];
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
-		if(!pm.fromChars729(line)) return 1;
+		if(vanilla) {
+			pm.fromChars81(line);
+		}
+		else {
+			if(!pm.fromChars729(line)) return 1;
+		}
 		findBackdoor(pm);
 	}
 	return 0;

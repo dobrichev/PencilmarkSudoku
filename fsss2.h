@@ -60,12 +60,20 @@ struct pencilmarks {
 	}
 	pencilmarks& fromSolver(const bm128* solverPM) {
 		for(int d = 0; d < 9; d++) {
-			//pm[d] = constraints::mask81;
 			pm[d] = t_128({0xFFFFFFFFFFFFFFFF,    0x0001FFFF});
 			pm[d].clearBits(solverPM[d]); //allow all active pencilmarks
 		}
 		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
 	}
+    bool fromChars81(const char *src) {
+    	clear(); //all allowed
+    	const char* s = src;
+		for(int c = 0; c < 81; c++) {
+			if(*s >= '1' && *s <= '9') forceCell(c, (*s) - '1');
+			s++;
+		}
+    	return true;
+    }
     bool fromChars729(const char *src) {
     	clear();
     	const char* s = src;
