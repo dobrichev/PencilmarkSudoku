@@ -69,11 +69,11 @@ struct complementaryPencilmarksX {
 		getSingleSolution ss;
 		int nSol = ss.solve(forbiddenValuePositions, sol2);
 		if(nSol != 1) {
-			printf("\nNot unique, nSol = %d\n", nSol);
+			fprintf(stderr, "\nNot unique, nSol = %d\n", nSol);
 			return false;
 		}
 		if(memcmp(sol, sol2, 81) != 0) {
-			printf("\nWrong solution\n");
+			fprintf(stderr, "\nWrong solution\n");
 			return false;
 		}
 		for(int d = 0; d < 9; d++) {
@@ -84,8 +84,7 @@ struct complementaryPencilmarksX {
 					hasSingleSolution sss;
 					tmp.forbiddenValuePositions[d].clearBit(c);
 					if(2 != sss.solve(tmp.forbiddenValuePositions)) {
-						printf("\nNon-minimal, value=%d, cell=%d is redundant\n", d + 1, c);
-						dump();
+						fprintf(stderr, "\nNon-minimal, value=%d, cell=%d is redundant\n", d + 1, c);
 						return false;
 					}
 				}
@@ -201,7 +200,7 @@ struct complementaryPencilmarksX {
 
 struct minimizer {
 	void minimizeVanilla(char *puz);
-	void minimizePencilmarks(char *puz); //expand the pencilmarks for single-solution puzzle
+	void minimizePencilmarks(char *puz, int bufferSize); //expand the pencilmarks for single-solution puzzle
 	void minimizePencilmarks(pencilmarks& puz); //expand the pencilmarks for single-solution puzzle
 
 	void reduceM2P1(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle

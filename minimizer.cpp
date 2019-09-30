@@ -126,7 +126,7 @@ void minimizer::minimizeVanilla(char *puz) {
 		prevPass.swap(curPass);
 	} while(!prevPass.empty());
 }
-void minimizer::minimizePencilmarks(char *puz) {
+void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
 	auto rg(std::mt19937{std::random_device{}()});
 	//auto rg(std::mt19937{});
 	//auto rg(std::mt19937{0});
@@ -138,7 +138,7 @@ void minimizer::minimizePencilmarks(char *puz) {
 		getSingleSolution ss;
 		int nSol = ss.solve(puz, sol);
 		if(1 != nSol) {
-			printf("%d,", nSol);
+			fprintf(stderr, "Nsol=%d\n", nSol);
 			return; //silently ignore invalid or multiple-solution puzzles
 		}
 	}
@@ -169,7 +169,7 @@ void minimizer::minimizePencilmarks(char *puz) {
 
 	do { //while the previous pass returns puzzles do a next pass
 		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
-		printf("Pass %d, maximizing %d pencilmarks. Parent list is of size\t%d\n", numPasses++, numPencilmarks++, (int)previousPass.size());
+		fprintf(stderr, "Pass %d, maximizing %d pencilmarks. Parent list is of size\t%d\n", numPasses++, numPencilmarks++, (int)previousPass.size());
 		for(int currDigit = 8; currDigit >= 0; currDigit--) { //iterate digits
 			for(int currCell = 80; currCell >=0; currCell--) { //iterate cells in reverse order
 				if(!original.isForRemoval(currDigit, currCell))
@@ -188,22 +188,28 @@ void minimizer::minimizePencilmarks(char *puz) {
 								currentPass.insert(current); //store it to avoid duplicate processing later in this pass
 								if(current.isMinimal()) {
 									//there are no more givens to remove => current is a minimal puzzle
-									printf("c");
+									//printf("c");
 									numMinimals++;
 									if(!current.isMinimalUniqueDoubleCheck(sol)) return;
-									printf("\n");
-									current.dump2();
+									//printf("\n");
+									//current.dump2();
+									char buf[730];
+									current.forbiddenValuePositions.toChars729(buf);
+									printf("%729.729s\t%d\n", buf, 729 - numPencilmarks);
 								}
 							}
 							else {
 								const_cast<complementaryPencilmarksX&>(parent).markAsFixed(currDigit, currCell); //mark the clue as known non-redundant in this context to avoid duplicate checking later
 								if(parent.isMinimal()) {
 									//there are no more givens to remove => parent is proven minimal puzzle
-									printf("p");
+									//printf("p");
 									numMinimals++;
 									if(!parent.isMinimalUniqueDoubleCheck(sol)) return;
-									printf("\n");
-									parent.dump2();
+									//printf("\n");
+									//parent.dump2();
+									char buf[730];
+									parent.forbiddenValuePositions.toChars729(buf);
+									printf("%729.729s\t%d\n", buf, 729 - numPencilmarks);
 								}
 								continue; //continue with next parent
 							}
@@ -216,11 +222,11 @@ void minimizer::minimizePencilmarks(char *puz) {
 			} //cell
 		} //digit
 		previousPass.clear();
-		std::experimental::sample(std::begin(currentPass), std::end(currentPass), std::inserter(previousPass, previousPass.end()), 100, rg); //gcc-specific
+		std::experimental::sample(std::begin(currentPass), std::end(currentPass), std::inserter(previousPass, previousPass.end()), bufferSize, rg); //gcc-specific
 		currentPass.clear();
 		fflush(NULL);
 	} while(!previousPass.empty());
-	printf("\nMinimals found = %lu\n", numMinimals);
+	fprintf(stderr, "\nMinimals found = %lu\n", numMinimals);
 }
 void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions) {
 	char sol[88];

@@ -26,7 +26,7 @@ options::options() {
 
 	anyopt.addUsage(" --solve             Solve puzzles");
 	anyopt.setCommandFlag("solve");
-	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
+	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	anyopt.setCommandFlag("vanilla");
 	anyopt.addUsage("   --groupbygrid         Normalized puzzles grouped by solution (not impl.)");
 	anyopt.setCommandFlag("groupbygrid");
@@ -41,13 +41,20 @@ options::options() {
 
 	anyopt.addUsage(" --backdoor          Print backdoors size & exemplar");
 	anyopt.setCommandFlag("backdoor");
-	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
+	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	//anyopt.setCommandFlag("vanilla");
 
-	anyopt.addUsage(" --solrowminlex      Transform valid puzzle to its solution lexicographically minimal row morph");
+	anyopt.addUsage(" --solrowminlex      Transform valid puzzles to their solution lexicographically minimal row morph");
 	anyopt.setCommandFlag("solrowminlex");
-	anyopt.addUsage("   --vanilla             input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
+	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	//anyopt.setCommandFlag("vanilla");
+
+	anyopt.addUsage(" --minimizerandom    Remove all redundant constraints from valid puzzles randomly");
+	anyopt.setCommandFlag("minimizerandom");
+	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
+	//anyopt.setCommandFlag("vanilla");
+	anyopt.addUsage("   --buffersize <n>      Number of random subgrids processed in each pass (100)");
+	anyopt.setOption("buffersize");
 
 	anyopt.addUsage("");
 
@@ -120,6 +127,9 @@ int options::execCommand() {
 	}
 	if(anyopt.getFlag("solrowminlex")) {
 		return transform::cmdSolRowMinLex();
+	}
+	if(anyopt.getFlag("minimizerandom")) {
+		return transform::cmdMinimizeRandom();
 	}
 	cout << "Error: No command specified." << endl;
 	return -1;

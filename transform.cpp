@@ -2,8 +2,10 @@
 #include "pencilmarks.h"
 #include "options.h"
 #include "fsss2.h"
+#include "minimizer.h"
 
 int transform::cmdSolRowMinLex() {
+	int ret = 0;
 	char line[2000];
 	char outPuz[729];
 	char sol[88];
@@ -15,13 +17,43 @@ int transform::cmdSolRowMinLex() {
 			pm.fromChars81(line);
 		}
 		else {
-			if(!pm.fromChars729(line)) return 1;
+			if(!pm.fromChars729(line)) {
+				ret = 1;
+				continue;
+			}
 		}
 		pencilmarks res;
-		if(!solver.solve(pm, sol)) continue; //silently ignore invalid puzzles
+		if(!solver.solve(pm, sol)) {
+			ret = 1;
+			continue; //silently ignore invalid puzzles
+		}
 		solRowMinLex::pmMinLex(pm, sol, res);
 		res.toChars729(outPuz);
 		printf("%729.729s\n", outPuz);
 	}
-	return 0;
+	return ret;
 }
+int transform::cmdMinimizeRandom() {
+	int ret = 0;
+	char line[2000];
+	bool vanilla = opt.getFlag("vanilla");
+	int bufSize = opt.getIntValue("buffersize", 100);
+	minimizer mm;
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(vanilla) {
+			pm.fromChars81(line);
+			char curPuz[88];
+			for(int i = 0; i < 81; i++) curPuz[i] = (line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
+			mm.minimizePencilmarks(curPuz, bufSize);
+		}
+		else {
+			if(!pm.fromChars729(line)) {
+				ret = 1;
+				continue;
+			}
+		}
+	}
+	return ret;
+}
+
