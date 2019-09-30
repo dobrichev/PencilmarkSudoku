@@ -19,8 +19,8 @@
 //for low-clue pencilmark-only sudoku
 //#define GUESS_STRATEGY_2
 
-#define USE_LOCKED_CANDIDATES // <<<<<<<<<<<<<============== bug there !!!!!!!!!!!!!
-//#define LOCKED_CANDIDATES_ALWAYS
+#define USE_LOCKED_CANDIDATES
+#define LOCKED_CANDIDATES_ALWAYS
 #define LOCKED_CANDIDATES_USE_CACHE
 
 //#define USE_SUBSETS

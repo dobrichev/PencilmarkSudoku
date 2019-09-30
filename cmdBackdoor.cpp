@@ -29,7 +29,8 @@ void cmdBackdoor::findBackdoor(const pencilmarks& pm) { //puzzle in 729-columns 
 	char sol[88];
 	char outPuz[729];
 	char outPuz2[729];
-	bm128 givens{};
+	bm128 givens;
+	givens.clear();
 	for(int c = 0; c < 81; c++) {
 		int numAllowed = 0;
 		for(int d = 0; d < 9; d++) {
@@ -41,7 +42,6 @@ void cmdBackdoor::findBackdoor(const pencilmarks& pm) { //puzzle in 729-columns 
 		givens.setBit(c);
 		nextCell:;
 	}
-	//if(!complementaryPencilmarksX::fromChars2(p, pm)) return;
 	if(1 != ss.solve(pm, sol)) return;
 	int minBD = 0;
 	pmExemplar = pm;
