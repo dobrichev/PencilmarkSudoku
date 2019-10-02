@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "options.h"
 
-const char *versionString = "Pencilmark Solver v1.0 (2019-09-29)";
+const char *versionString = "Pencilmark Solver v1.1 (2019-10-02)";
 
 //#define DIRTY_TEST
 

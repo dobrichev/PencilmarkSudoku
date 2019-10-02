@@ -1434,7 +1434,9 @@ void minimizer::transformM2P2(pencilmarks& forbiddenValuePositions) { //full sca
 void minimizer::printRowMinLex(const pencilmarks& src, const char* sol) { //transform single-solution puzzle to row-min-lex by solution grid
 	pencilmarks res;
 	solRowMinLex::pmMinLex(src, sol, res);
-	complementaryPencilmarksX::dump2(res);
+	char outPuz[729];
+	res.toChars729(outPuz);
+	printf("%729.729s\t%d\n", outPuz, res.popcount());
 }
 void minimizer::guessCounters(const char* p) { //puzzle in 729-columns format, solution, totalNumGuesses, numGuesses[0] ...
 	pencilmarks pm;
