@@ -38,20 +38,20 @@ int transform::cmdMinimizeRandom() {
 	char line[2000];
 	bool vanilla = opt.getFlag("vanilla");
 	int bufSize = opt.getIntValue("buffersize", 100);
-	minimizer mm;
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
 		if(vanilla) {
 			pm.fromChars81(line);
 			char curPuz[88];
 			for(int i = 0; i < 81; i++) curPuz[i] = (line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
-			mm.minimizePencilmarks(curPuz, bufSize);
+			minimizer::minimizePencilmarks(curPuz, bufSize);
 		}
 		else {
 			if(!pm.fromChars729(line)) {
 				ret = 1;
 				continue;
 			}
+			minimizer::minimizePencilmarks(pm, bufSize);
 		}
 	}
 	return ret;

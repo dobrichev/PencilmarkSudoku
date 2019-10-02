@@ -16,6 +16,13 @@ struct pencilmarks {
 			pm[i].clear();
 		}
 	}
+	int popcount() const {
+		int ret = 0;
+		for(int i = 0; i < 9; i++) {
+			ret += pm[i].popcount_128();
+		}
+		return ret;
+	}
 	const bm128& operator[](int digit) const {
 		return pm[digit];
 	}

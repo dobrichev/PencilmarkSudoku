@@ -199,9 +199,10 @@ struct complementaryPencilmarksX {
 };
 
 struct minimizer {
-	void minimizeVanilla(char *puz);
-	void minimizePencilmarks(char *puz, int bufferSize); //expand the pencilmarks for single-solution puzzle
-	void minimizePencilmarks(pencilmarks& puz); //expand the pencilmarks for single-solution puzzle
+	static void minimizeVanilla(char *puz);
+	static void minimizePencilmarks(char *puz, int bufferSize); //expand the pencilmarks for single-solution puzzle
+	static void minimizePencilmarks(pencilmarks& puz, int bufferSize); //expand the pencilmarks for single-solution puzzle
+	static void minimizePencilmarks(const complementaryPencilmarksX& original, const char* sol, int bufferSize);
 
 	void reduceM2P1(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle
 	void reduceM2P1v2(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle

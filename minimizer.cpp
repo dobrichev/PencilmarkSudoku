@@ -127,13 +127,7 @@ void minimizer::minimizeVanilla(char *puz) {
 	} while(!prevPass.empty());
 }
 void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
-	auto rg(std::mt19937{std::random_device{}()});
-	//auto rg(std::mt19937{});
-	//auto rg(std::mt19937{0});
-	size_t numMinimals = 0;
-	int numPencilmarks = 81 * 9;
-	int numPasses = 0;
-	char sol[256];
+	char sol[88];
 	{
 		getSingleSolution ss;
 		int nSol = ss.solve(puz, sol);
@@ -143,29 +137,57 @@ void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
 		}
 	}
 
+	complementaryPencilmarksX original;
+	original.forbiddenValuePositions.clear(); //allowed on all positions
+	original.fixedValuePositions.clear(); //any position could be disallowed
+	for(int c = 0; c < 81; c++) {
+		if(puz[c] == 0) {
+			original.fixedValuePositions[sol[c] - 1].setBit(c); //don't disallow the target solution
+		}
+		else {
+			for(int d = 0; d < 9; d++) {
+				if((puz[c] - 1) == d) {
+					original.fixedValuePositions[d].setBit(c); //don't disallow the target solution
+				}
+				else {
+					original.forbiddenValuePositions[d].setBit(c); //initially all values except the given are disallowed in this cell
+				}
+			}
+		}
+	}
+	minimizePencilmarks(original, sol, bufferSize);
+}
+void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions, int bufferSize) {
+	char sol[88];
+	{
+		getSingleSolution ss;
+		int nSol = ss.solve(forbiddenValuePositions, sol);
+		if(1 != nSol) {
+			fprintf(stderr, "Nsol=%d\n", nSol);
+			return; //silently ignore invalid or multiple-solution puzzles
+		}
+	}
+	complementaryPencilmarksX original;
+	original.forbiddenValuePositions = forbiddenValuePositions; //allow all initially given positions
+	original.fixedValuePositions.clear(); //any position could be disallowed
+	for(int c = 0; c < 81; c++) {
+		original.fixedValuePositions[sol[c] - 1].setBit(c); //don't disallow the target solution
+	}
+	minimizePencilmarks(original, sol, bufferSize);
+}
+void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, const char* sol, int bufferSize) {
+	int numPencilmarks = 81 * 9 - original.forbiddenValuePositions.popcount();
+	int numPasses = 0;
 	std::set<complementaryPencilmarksX> previousPass;
 	std::set<complementaryPencilmarksX> currentPass;
 
-	complementaryPencilmarksX original;
-	for(int d = 0; d < 9; d++) {
-		original.forbiddenValuePositions[d].clear(); //allowed on all positions
-		original.fixedValuePositions[d].clear(); //any position could be disallowed
-	}
-	for(int c = 0; c < 81; c++) {
-		if(puz[c] == 0) continue;
-		for(int d = 0; d < 9; d++) {
-			if((puz[c] - 1) == d) {
-				original.fixedValuePositions[d].setBit(c); //don't disallow the target solution
-			}
-			else {
-				original.forbiddenValuePositions[d].setBit(c); //initially all values except the given are disallowed in this cell
-			}
-		}
-		numPencilmarks -= 8;
-	}
 	previousPass.insert(original); //all initial constraints, known non-redundant constrains only for initial givens that must survive for the solution
 
 	isRedundant redundancyTester;
+	size_t numMinimals = 0;
+	auto rg(std::mt19937{std::random_device{}()});
+	//auto rg(std::mt19937{});
+	//auto rg(std::mt19937{0});
 
 	do { //while the previous pass returns puzzles do a next pass
 		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
@@ -228,102 +250,102 @@ void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
 	} while(!previousPass.empty());
 	fprintf(stderr, "\nMinimals found = %lu\n", numMinimals);
 }
-void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions) {
-	char sol[88];
-	{
-		getSingleSolution ss;
-		if(1 != ss.solve(forbiddenValuePositions, sol))
-			return; //silently ignore invalid or multiple-solution puzzles
-	}
-	std::vector<complementaryPencilmarksX> prevPass;
-	std::vector<complementaryPencilmarksX> curPass;
-	prevPass.reserve(65000);
-	curPass.reserve(65000);
-
-	complementaryPencilmarksX original;
-	for(int d = 0; d < 9; d++) {
-		original.forbiddenValuePositions[d].clear();
-		original.fixedValuePositions[d].clear();
-	}
-	for(int c = 0; c < 81; c++) {
-		for(int d = 0; d < 9; d++) {
-			if(sol[c] != d) {
-				original.forbiddenValuePositions[d].setBit(c); //mark as "disallowed"
-			}
-		}
-	}
-	prevPass.push_back(original); //all initial constrains, known non-redundant constrains only for initial givens that must survive for the solution
-
-	isRedundant redundancyTester;
-
-	do { //while the previous pass returns puzzles do a next pass
-		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
-		printf("Parent list is of size %d\n", (int)prevPass.size());
-		for(int currDigit = 0; currDigit < 9; currDigit++) { //iterate digits
-			for(int currCell = 80; currCell >=0; currCell--) { //iterate cells in reverse order
-				if(!original.isForRemoval(currDigit, currCell))
-					continue; //we wouldn't find this position within the parents' list
-				for(std::vector<complementaryPencilmarksX>::iterator parent = prevPass.begin(); parent != prevPass.end(); parent++) {
-					//if((parent->aliveGivensMask & currGivenBit) && !(parent->knownNonRedundantsMask & currGivenBit)) { //not already removed and not marked as "don't remove"
-					if(parent->isForRemoval(currDigit, currCell)) { //not already removed and not marked as "don't remove"
-						//check whether the constrains combination is previously processed in the same pass
-						complementaryPencilmarksX current;
-						current.getReducedForbiddensFrom(*parent, currDigit, currCell);
-						if(std::binary_search(curPass.begin(), curPass.end(), current)) {
-							//already processed
-							continue;
-						}
+//void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions, int bufferSize) {
+//	char sol[88];
+//	{
+//		getSingleSolution ss;
+//		if(1 != ss.solve(forbiddenValuePositions, sol))
+//			return; //silently ignore invalid or multiple-solution puzzles
+//	}
+//	std::vector<complementaryPencilmarksX> prevPass;
+//	std::vector<complementaryPencilmarksX> curPass;
+//	prevPass.reserve(65000);
+//	curPass.reserve(65000);
+//
+//	complementaryPencilmarksX original;
+//	for(int d = 0; d < 9; d++) {
+//		original.forbiddenValuePositions[d].clear();
+//		original.fixedValuePositions[d].clear();
+//	}
+//	for(int c = 0; c < 81; c++) {
+//		for(int d = 0; d < 9; d++) {
+//			if(sol[c] != d) {
+//				original.forbiddenValuePositions[d].setBit(c); //mark as "disallowed"
+//			}
+//		}
+//	}
+//	prevPass.push_back(original); //all initial constrains, known non-redundant constrains only for initial givens that must survive for the solution
+//
+//	isRedundant redundancyTester;
+//
+//	do { //while the previous pass returns puzzles do a next pass
+//		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
+//		printf("Parent list is of size %d\n", (int)prevPass.size());
+//		for(int currDigit = 0; currDigit < 9; currDigit++) { //iterate digits
+//			for(int currCell = 80; currCell >=0; currCell--) { //iterate cells in reverse order
+//				if(!original.isForRemoval(currDigit, currCell))
+//					continue; //we wouldn't find this position within the parents' list
+//				for(std::vector<complementaryPencilmarksX>::iterator parent = prevPass.begin(); parent != prevPass.end(); parent++) {
+//					//if((parent->aliveGivensMask & currGivenBit) && !(parent->knownNonRedundantsMask & currGivenBit)) { //not already removed and not marked as "don't remove"
+//					if(parent->isForRemoval(currDigit, currCell)) { //not already removed and not marked as "don't remove"
+//						//check whether the constrains combination is previously processed in the same pass
+//						complementaryPencilmarksX current;
+//						current.getReducedForbiddensFrom(*parent, currDigit, currCell);
+//						if(std::binary_search(curPass.begin(), curPass.end(), current)) {
+//							//already processed
+//							continue;
+//						}
+////						{
+////							char pp[88];
+////							printf("********************************\n");
+////							for(int i = 0; i < 9; i++) {
+////								current.aliveConstrainsMask[i].toMask81(pp);
+////								printf("%81.81s\n", pp);
+////							}
+////							printf("\n");
+////							for(int i = 0; i < 9; i++) {
+////								current.knownNonRedundantsMask[i].toMask81(pp);
+////								printf("%81.81s\n", pp);
+////							}
+////						}
+//						//check whether the currGiven is redundant in this context
 //						{
-//							char pp[88];
-//							printf("********************************\n");
-//							for(int i = 0; i < 9; i++) {
-//								current.aliveConstrainsMask[i].toMask81(pp);
-//								printf("%81.81s\n", pp);
+//							if(redundancyTester.solve(current.forbiddenValuePositions, currDigit, currCell)) {
+//								//the currGiven is redundant in the context of the parent
+//								current.getFixedFrom(*parent);
+//								curPass.push_back(current); //store it to avoid duplicate processing later in this pass
+//								if(current.isMinimal()) {
+//									//there are no more givens to remove => a minimal puzzle is found
+////									char pp[81];
+////									for(int i = 0; i < 81; i++) {
+////										pp[i] = p[i] ? p[i] + '0' : '.';
+////									}
+////									printf("%81.81s\n", pp);
+//									printf(".");
+//								}
 //							}
-//							printf("\n");
-//							for(int i = 0; i < 9; i++) {
-//								current.knownNonRedundantsMask[i].toMask81(pp);
-//								printf("%81.81s\n", pp);
+//							else {
+//								parent->markAsFixed(currDigit, currCell); //mark the clue as known non-redundant in this context to avoid duplicate checking later
+//								if(current.isMinimal()) {
+//									//there are no more givens to remove => parent is proven minimal puzzle
+////									char pp[81];
+////									for(int i = 0; i < 81; i++) {
+////										pp[i] = p[i] ? p[i] + '0' : '.';
+////									}
+////									printf("%81.81s\n", pp);
+//									printf(",");
+//								}
+//								continue; //continue with next parent
 //							}
 //						}
-						//check whether the currGiven is redundant in this context
-						{
-							if(redundancyTester.solve(current.forbiddenValuePositions, currDigit, currCell)) {
-								//the currGiven is redundant in the context of the parent
-								current.getFixedFrom(*parent);
-								curPass.push_back(current); //store it to avoid duplicate processing later in this pass
-								if(current.isMinimal()) {
-									//there are no more givens to remove => a minimal puzzle is found
-//									char pp[81];
-//									for(int i = 0; i < 81; i++) {
-//										pp[i] = p[i] ? p[i] + '0' : '.';
-//									}
-//									printf("%81.81s\n", pp);
-									printf(".");
-								}
-							}
-							else {
-								parent->markAsFixed(currDigit, currCell); //mark the clue as known non-redundant in this context to avoid duplicate checking later
-								if(current.isMinimal()) {
-									//there are no more givens to remove => parent is proven minimal puzzle
-//									char pp[81];
-//									for(int i = 0; i < 81; i++) {
-//										pp[i] = p[i] ? p[i] + '0' : '.';
-//									}
-//									printf("%81.81s\n", pp);
-									printf(",");
-								}
-								continue; //continue with next parent
-							}
-						}
-					}
-				} //parent
-			} //cell
-		} //digit
-		prevPass.clear();
-		prevPass.swap(curPass);
-	} while(!prevPass.empty());
-}
+//					}
+//				} //parent
+//			} //cell
+//		} //digit
+//		prevPass.clear();
+//		prevPass.swap(curPass);
+//	} while(!prevPass.empty());
+//}
 void minimizer::reduceM2P1(const char* p) {
 	complementaryPencilmarksX src;
 	if(!src.fromChars2(p)) return; //silently ignore invalid inputs
