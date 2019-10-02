@@ -10,21 +10,17 @@
 #include "options.h"
 #include "fsss2.h"
 
-cmdSolve::cmdSolve() {
-	groupByGrid = opt.getFlag("groupbygrid");
-	gridsOnly = opt.getFlag("gridsonly");
-	minimals = opt.getFlag("minimals");
-	count = opt.getFlag("count");
-	backdoor = opt.getFlag("backdoor");
-	vanilla = opt.getFlag("vanilla");
-	maxSolutionCount = opt.getIntValue("maxsolutioncount", INT_MAX);
-}
 int cmdSolve::exec() {
+	bool minimals = opt.getFlag("minimals");
+	bool count = opt.getFlag("count");
+	bool vanilla = opt.getFlag("vanilla");
+	int maxSolutionCount = opt.getIntValue("maxsolutioncount", INT_MAX);
 	int ret = 0;
 	char line[2000];
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
 		getSingleSolution ss;
+		multiSolutionPM ms;
 		char sol[88];
 		char outPuz[729];
 		if(vanilla) {
@@ -36,27 +32,38 @@ int cmdSolve::exec() {
 				continue;
 			}
 		}
-		if(1 != ss.solve(pm, sol)) {
-			ret = 1;
-			continue;
-		}
-		pm.toChars729(outPuz);
-		for(int i = 0; i < 81; i++) {
-			sol[i] += '0';
-		}
-		if(minimals) {
-			int val = -1;
-			int cell;
-			getFirstRedundantConstraint(sol, pm, val, cell);
-			if(val == -1) {
-				printf("%729.729s\t%81.81s\tMinimal\n", outPuz, sol);
-			}
-			else {
-				printf("%729.729s\t%81.81s\tRedundant(val=%d,pos=%d)\n", outPuz, sol, val, cell);
-			}
+		if(count) {
+			pencilmarks respm;
+			char outPm[729];
+			int numSol = ms.solve(pm, respm, maxSolutionCount);
+			respm.fromSolver();
+			pm.toChars729(outPuz);
+			respm.toChars729(outPm);
+			printf("%729.729s\t%d\t%729.729s\n", outPuz, numSol, outPm);
 		}
 		else {
-			printf("%729.729s\t%81.81s\n", outPuz, sol);
+			if(1 != ss.solve(pm, sol)) {
+				ret = 1;
+				continue;
+			}
+			pm.toChars729(outPuz);
+			for(int i = 0; i < 81; i++) {
+				sol[i] += '0';
+			}
+			if(minimals) {
+				int val = -1;
+				int cell;
+				getFirstRedundantConstraint(sol, pm, val, cell);
+				if(val == -1) {
+					printf("%729.729s\t%81.81s\tMinimal\n", outPuz, sol);
+				}
+				else {
+					printf("%729.729s\t%81.81s\tRedundant(val=%d,pos=%d)\n", outPuz, sol, val, cell);
+				}
+			}
+			else {
+				printf("%729.729s\t%81.81s\n", outPuz, sol);
+			}
 		}
 	}
 	return ret;

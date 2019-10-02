@@ -28,15 +28,11 @@ options::options() {
 	anyopt.setCommandFlag("solve");
 	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	anyopt.setCommandFlag("vanilla");
-	anyopt.addUsage("   --groupbygrid         Normalized puzzles grouped by solution (not impl.)");
-	anyopt.setCommandFlag("groupbygrid");
-	anyopt.addUsage("     --gridsonly             Prints ordered solution grids w/o duplicates (not impl.)");
-	anyopt.setFlag("gridsonly");
 	anyopt.addUsage("   --minimals            Check puzzles for minimality");
 	anyopt.setFlag("minimals");
-	anyopt.addUsage("   --count               Print only the solution count (not impl.)");
+	anyopt.addUsage("   --count               Print solution count and reduced pencilmarks");
 	anyopt.setFlag("count");
-	anyopt.addUsage("     --maxsolutioncount <n>  Solves up to <n>-th solution (INT_MAX) (not impl.)");
+	anyopt.addUsage("     --maxsolutioncount <n>  Solves up to <n>-th solution (INT_MAX)");
 	anyopt.setOption("maxsolutioncount");
 
 	anyopt.addUsage(" --backdoor          Print backdoors size & exemplar");

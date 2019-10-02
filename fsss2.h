@@ -241,7 +241,7 @@ public:
 //compose pencilmarks from all solutions
 class multiSolutionPM final : public nullCollector {
 	int nsol;
-	pencilmarks resPM; //solutionFound sets bits from sol[] here
+	pencilmarks* resPM; //solutionFound sets bits from sol[] here
 	char sol[81]; //setCellValue accumulates the solution here
 	int solutionsLimit;
 public:

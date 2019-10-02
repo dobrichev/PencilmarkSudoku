@@ -1598,7 +1598,7 @@ void multiSolutionPM::setCellValue(int cell, int val) {
 }
 bool multiSolutionPM::solutionFound() {
 	for(int c = 0; c < 81; c++) {
-		resPM[sol[c] - 1].setBit(c);
+		(*resPM)[sol[c] - 1].setBit(c);
 	}
 	++nsol;
 	return nsol == solutionsLimit;
@@ -1606,20 +1606,20 @@ bool multiSolutionPM::solutionFound() {
 int multiSolutionPM::solve(const char* p, pencilmarks& res, int maxSolutions) {
 	fsss2<multiSolutionPM> solver(*this);
 	nsol = 0;
-	resPM = res;
+	resPM = &res;
 	solutionsLimit = maxSolutions;
-	resPM.clear();
+	res.clear();
 	solver.solve(p);
-	return nsol == solutionsLimit ? 0 : nsol;
+	return nsol == solutionsLimit ? -1 : nsol;
 }
 int multiSolutionPM::solve(const pencilmarks& forbiddenValuePositions, pencilmarks& res, int maxSolutions) {
 	fsss2<multiSolutionPM> solver(*this);
 	nsol = 0;
-	resPM = res;
+	resPM = &res;
 	solutionsLimit = maxSolutions;
-	resPM.clear();
+	res.clear();
 	solver.solve(forbiddenValuePositions);
-	return nsol == solutionsLimit ? 0 : nsol;
+	return nsol == solutionsLimit ? -1 : nsol;
 }
 int multiSolutionPM::solve(const pencilmarks& forbiddenValuePositions, pencilmarks& res) {
 	isRedundant rt;

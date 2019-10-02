@@ -48,6 +48,14 @@ struct pencilmarks {
 		}
 		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
 	}
+	pencilmarks& fromSolver() {
+		for(int d = 0; d < 9; d++) {
+			bm128 tmp = t_128({0xFFFFFFFFFFFFFFFF,    0x0001FFFF});
+			tmp.clearBits(pm[d]);
+			pm[d] = tmp; //allow all active pencilmarks
+		}
+		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
+	}
     bool fromChars81(const char *src) {
     	clear(); //all allowed
     	const char* s = src;
