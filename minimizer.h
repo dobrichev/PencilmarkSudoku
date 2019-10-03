@@ -66,7 +66,7 @@ struct complementaryPencilmarksX {
     }
     bool isMinimalUniqueDoubleCheck(const char* sol) const {
 		char sol2[88];
-		getSingleSolution ss;
+		fsss2::getSingleSolution ss;
 		int nSol = ss.solve(forbiddenValuePositions, sol2);
 		if(nSol != 1) {
 			fprintf(stderr, "\nNot unique, nSol = %d\n", nSol);
@@ -81,7 +81,7 @@ struct complementaryPencilmarksX {
 				if(forbiddenValuePositions[d].isBitSet(c)) {
 					//try removal of this pencilmark and see whether it causes 2+ solutions
 					complementaryPencilmarksX tmp(*this);
-					hasSingleSolution sss;
+					fsss2::hasSingleSolution sss;
 					tmp.forbiddenValuePositions[d].clearBit(c);
 					if(2 != sss.solve(tmp.forbiddenValuePositions)) {
 						fprintf(stderr, "\nNon-minimal, value=%d, cell=%d is redundant\n", d + 1, c);

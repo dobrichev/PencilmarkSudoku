@@ -19,8 +19,8 @@ int cmdSolve::exec() {
 	char line[2000];
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
-		getSingleSolution ss;
-		multiSolutionPM ms;
+		fsss2::getSingleSolution ss;
+		fsss2::multiSolutionPM ms;
 		char sol[88];
 		char outPuz[729];
 		if(vanilla) {
@@ -69,7 +69,7 @@ int cmdSolve::exec() {
 	return ret;
 }
 void cmdSolve::getFirstRedundantConstraint(const char* sol, const pencilmarks& forbiddenValuePositions, int& val, int& cell) {
-	hasSingleSolution sss;
+	fsss2::hasSingleSolution sss;
 	for(int d = 0; d < 9; d++) {
 		for(int c = 0; c < 81; c++) {
 			if(forbiddenValuePositions[d].isBitSet(c)) {

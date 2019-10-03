@@ -35,14 +35,14 @@ void minimizer::minimizeVanilla(char *puz) {
 	original.knownNonRedundantsMask = 0;
 
 	{
-		hasSingleSolution ss;
+		fsss2::hasSingleSolution ss;
 		if(1 != ss.solve(puz))
 			return; //silently ignore invalid or multiple-solution puzzles
 	}
 
 	prevPass.push_back(original); //no eliminations and no known non-redundant clues so far
 
-	isRedundant redundancyTester;
+	fsss2::isRedundant redundancyTester;
 
 	do { //while the previous pass returns puzzles do a next pass
 		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
@@ -129,7 +129,7 @@ void minimizer::minimizeVanilla(char *puz) {
 void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
 	char sol[88];
 	{
-		getSingleSolution ss;
+		fsss2::getSingleSolution ss;
 		int nSol = ss.solve(puz, sol);
 		if(1 != nSol) {
 			fprintf(stderr, "Nsol=%d\n", nSol);
@@ -160,7 +160,7 @@ void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
 void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions, int bufferSize) {
 	char sol[88];
 	{
-		getSingleSolution ss;
+		fsss2::getSingleSolution ss;
 		int nSol = ss.solve(forbiddenValuePositions, sol);
 		if(1 != nSol) {
 			fprintf(stderr, "Nsol=%d\n", nSol);
@@ -183,7 +183,7 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 
 	previousPass.insert(original); //all initial constraints, known non-redundant constrains only for initial givens that must survive for the solution
 
-	isRedundant redundancyTester;
+	fsss2::isRedundant redundancyTester;
 	size_t numMinimals = 0;
 	auto rg(std::mt19937{std::random_device{}()});
 	//auto rg(std::mt19937{});
@@ -605,7 +605,7 @@ void minimizer::reduceM2P1(pencilmarks& forbiddenValuePositions) { // ~1 second/
 //	knownNoHiddenMisses = 0;
 	fprintf(stderr, ".");
 	bm128 exchangable[9][81][9];
-	getSingleSolution ss;
+	fsss2::getSingleSolution ss;
 	char sol[88]; //pass solution as hint parameter to canonicalizer
 #ifdef COUNT_TRIALS
 	int maxTrialsSoFar = 0;
@@ -717,7 +717,7 @@ void minimizer::reduceM2P1v2(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 //	knownNoLockedCandidatesMisses = 0;
 //	knownNoHiddenHits = 0;
 //	knownNoHiddenMisses = 0;
-	getSingleSolution ss;
+	fsss2::getSingleSolution ss;
 	struct solution {
 		char sol[88];
 	};
@@ -811,7 +811,7 @@ void minimizer::reduceM2P1v3(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 //	knownNoLockedCandidatesMisses = 0;
 //	knownNoHiddenHits = 0;
 //	knownNoHiddenMisses = 0;
-	getSingleSolution ss;
+	fsss2::getSingleSolution ss;
 	struct solution {
 		char sol[88];
 	};
@@ -927,7 +927,7 @@ void minimizer::reduceM2P1v4(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 //	knownNoLockedCandidatesMisses = 0;
 //	knownNoHiddenHits = 0;
 //	knownNoHiddenMisses = 0;
-	getSingleSolution ss;
+	fsss2::getSingleSolution ss;
 	struct solution {
 		char sol[88];
 	};
@@ -1055,8 +1055,8 @@ void minimizer::reduceM2P1v4(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 }
 void minimizer::tryReduceM1(pencilmarks& forbiddenValuePositions) { //output all unique {-1} if exist, else output original
 	//fprintf(stderr, ".");
-	getSingleSolution ss;
-	isRedundant redundantTester;
+	fsss2::getSingleSolution ss;
+	fsss2::isRedundant redundantTester;
 	char sol[88]; //pass solution as hint parameter to canonicalizer
 	if(1 != ss.solve(forbiddenValuePositions, sol)) return; //silently ignore invalid and miltiple-solution puzzles
 	bool hasReduced = false;
@@ -1080,7 +1080,7 @@ void minimizer::tryReduceM1(pencilmarks& forbiddenValuePositions) { //output all
 }
 void minimizer::transformM1P1(pencilmarks& forbiddenValuePositions) {
 	fprintf(stderr, ".");
-	hasSingleSolution ss;
+	fsss2::hasSingleSolution ss;
 	//apply {-1} and get multiple-solution puzzle
 	for(int d1 = 0; d1 < 9; d1++) {
 		for(int c1 = 0; c1 < 81; c1++) {
@@ -1105,7 +1105,7 @@ void minimizer::transformM1P1(pencilmarks& forbiddenValuePositions) {
 	} //d1
 }
 void minimizer::transformM2P2v1(pencilmarks& forbiddenValuePositions) { //full scan
-	hasSingleSolution ss;
+	fsss2::hasSingleSolution ss;
 	int numSolverCalls = 0;
 	clock_t start, finish;
 	start = clock();
@@ -1171,8 +1171,8 @@ void minimizer::transformM2P2v1(pencilmarks& forbiddenValuePositions) { //full s
 	fprintf(stderr, "\t%d,%2.3fs,%dK/s\n", numSolverCalls, tt, (int)(numSolverCalls / tt / 1000));
 }
 void minimizer::transformM2P2v2(pencilmarks& forbiddenValuePositions) { //partial scan
-	hasSingleSolution ss;
-	getTwoSolutions ts;
+	fsss2::hasSingleSolution ss;
+	fsss2::getTwoSolutions ts;
 	char sol1[2][81];
 	char sol2[2][81];
 	int numSolverCalls = 0;
@@ -1269,8 +1269,8 @@ void minimizer::transformM2P2v2(pencilmarks& forbiddenValuePositions) { //partia
 	fprintf(stderr, "\t%d,%2.3fs,%dK/s\n", numSolverCalls, tt, (int)(numSolverCalls / tt / 1000));
 }
 void minimizer::transformM2P2v3(pencilmarks& forbiddenValuePositions) { //full scan
-	hasSingleSolution ss;
-	multiSolutionPM as;
+	fsss2::hasSingleSolution ss;
+	fsss2::multiSolutionPM as;
 	pencilmarks pm1, pm2;
 	int numSolverCalls = 0;
 	clock_t start, finish;
@@ -1348,7 +1348,7 @@ void minimizer::transformM2P2v3(pencilmarks& forbiddenValuePositions) { //full s
 }
 void minimizer::transformM2P2(pencilmarks& forbiddenValuePositions) { //full scan
 	//hasAnySolution sss;
-	hasSingleSolution ss;
+	fsss2::hasSingleSolution ss;
 	int numSolverCalls = 0;
 	int p1valid = 0;
 	int p1invalid = 0;
@@ -1440,7 +1440,7 @@ void minimizer::printRowMinLex(const pencilmarks& src, const char* sol) { //tran
 }
 void minimizer::guessCounters(const char* p) { //puzzle in 729-columns format, solution, totalNumGuesses, numGuesses[0] ...
 	pencilmarks pm;
-	singleSolutionGuesses ssg;
+	fsss2::singleSolutionGuesses ssg;
 	int guessStat[81];
 	char sol[88];
 	char outPuz[729];
@@ -1681,8 +1681,8 @@ void minimizer::backdoorSizePm(const char* p) { //puzzle in 729-columns format, 
 //	};
 	pencilmarks pm;
 	pencilmarks pmExemplar;
-	getSingleSolution ss;
-	noGuess ng;
+	fsss2::getSingleSolution ss;
+	fsss2::noGuess ng;
 	char sol[88];
 	char outPuz[729];
 	char outPuz2[729];
@@ -1868,7 +1868,7 @@ void minimizer::backdoorSizePm(const char* p) { //puzzle in 729-columns format, 
 }
 void minimizer::solve(const char* p) { //puzzle in 729-columns format, solution
 	pencilmarks pm;
-	getSingleSolution ss;
+	fsss2::getSingleSolution ss;
 	char sol[88];
 	char outPuz[729];
 	//if(!complementaryPencilmarksX::fromChars2(p, pm)) return;

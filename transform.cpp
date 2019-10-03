@@ -9,7 +9,7 @@ int transform::cmdSolRowMinLex() {
 	char line[2000];
 	char outPuz[729];
 	char sol[88];
-	getAnySolution solver;
+	fsss2::getAnySolution solver;
 	bool vanilla = opt.getFlag("vanilla");
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;

@@ -57,6 +57,8 @@ struct constraints {
 	//static const uint32_t topCellsHouses; //1 for the houses having cells only within top 64 ones
 };
 
+namespace fsss2 {
+
 template < class X > class fsss2 {
 public:
 	//data model
@@ -275,5 +277,5 @@ public:
 	bool beforeGuess(int guessDepth, int &optCell, int &optDigit);
 	void init(const char *puz, const bm128* fixed);
 };
-
+} //namespace fsss2
 #endif /* SOLVER_H_ */

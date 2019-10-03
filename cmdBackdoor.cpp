@@ -29,8 +29,8 @@ int cmdBackdoor::exec() {
 }
 void cmdBackdoor::findBackdoor(const pencilmarks& pm) { //puzzle in 729-columns format, backdoorSize
 	pencilmarks pmExemplar;
-	getSingleSolution ss;
-	noGuess ng;
+	fsss2::getSingleSolution ss;
+	fsss2::noGuess ng;
 	char sol[88];
 	char outPuz[729];
 	char outPuz2[729];

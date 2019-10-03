@@ -24,15 +24,6 @@ extern int nTrials;
 //int knownNoHiddenHits;
 //int knownNoHiddenMisses;
 
-template <class X> fsss2<X>::fsss2(X &theCollector) : mode(0), guessDepth(0)
-#ifdef USE_LOCKED_CANDIDATES
-#ifndef LOCKED_CANDIDATES_ALWAYS
-		, lockedDone(0)
-#endif
-#endif
-, collector(theCollector)
-{}
-
 //only first 81 bits set
 constexpr t_128 constraints::mask81 = {0xFFFFFFFFFFFFFFFF,    0x0001FFFF};
 
@@ -219,6 +210,18 @@ constexpr tripletMask constraints::tripletMasks[54] = {
 	{{0x4000000000000000,0x0000000000010080}, {0x0020100804020100,0x0000000000000000}, {0x3000000000000000,0x000000000000C060}, },
 }; //tripletMasks
 #endif
+
+namespace fsss2 {
+
+template <class X> fsss2<X>::fsss2(X &theCollector) : mode(0), guessDepth(0)
+#ifdef USE_LOCKED_CANDIDATES
+#ifndef LOCKED_CANDIDATES_ALWAYS
+		, lockedDone(0)
+#endif
+#endif
+, collector(theCollector)
+{}
+
 
 template <class X> constexpr void fsss2<X>::initEmpty() {
 	//set all cells and houses as "unsolved"
@@ -1809,3 +1812,4 @@ void patEnum::init(const char *puz, const bm128* fixed) {
 	// - number of fixed values at the top of the positions, in numFixedValues. Unused.
 	// - a subgrid with populated fixed values and cleared others, in pp[]
 }
+} //namespace fsss2
