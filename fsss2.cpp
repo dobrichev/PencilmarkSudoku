@@ -871,15 +871,23 @@ single_found:
 				}
 				//eliminate the candidates from other digits
 				if(pairFound) {
+					//bool eliminationHere = false;
 					for(int d = 0; d < 9; d++) {
 						if((d != d1) && (d != d2)) {
 							if(!grid[d].isDisjoint(ss)) {
 								grid[d].clearBits(ss);
 								eliminationFound = true;
+								//eliminationHere = true;
 								//goto nakedAgain;
 							}
 						}
 					}
+					//if(eliminationHere) {
+					//	eliminationFound = true;
+					//}
+					//else {
+					//	knownNoSubsets[subsetIndex] = any;
+					//}
 				}
 				else {
 					knownNoSubsets[subsetIndex] = any;
@@ -890,7 +898,9 @@ single_found:
 		//subsetsDone++;
 		if(eliminationFound) {
 #ifdef USE_LOCKED_CANDIDATES
+#ifndef LOCKED_CANDIDATES_ALWAYS
 			lockedDone = 0;
+#endif
 #endif
 			goto nakedAgain;
 		}
