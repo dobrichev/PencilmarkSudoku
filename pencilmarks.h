@@ -12,16 +12,28 @@
 struct pencilmarks {
 	bm128 pm[9];
 	void clear() {
-		for(int i = 0; i < 9; i++) {
-			pm[i].clear();
+		for(int d = 0; d < 9; d++) {
+			pm[d].clear();
 		}
 	}
 	int popcount() const {
 		int ret = 0;
-		for(int i = 0; i < 9; i++) {
-			ret += pm[i].popcount_128();
+		for(int d = 0; d < 9; d++) {
+			ret += pm[d].popcount_128();
 		}
 		return ret;
+	}
+//	bool isSubsetOf(const pencilmarks& other) const {
+//		for(int d = 0; d < 9; d++) {
+//			if(!pm[d].isSubsetOf(other[d])) return false;
+//		}
+//		return true;
+//	}
+	bool isDisjoint(const pencilmarks& other) const {
+		for(int d = 0; d < 9; d++) {
+			if(!pm[d].isDisjoint(other[d])) return false;
+		}
+		return true;
 	}
 	const bm128& operator[](int digit) const {
 		return pm[digit];

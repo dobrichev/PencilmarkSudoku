@@ -37,20 +37,30 @@ int transform::cmdMinimizeRandom() {
 	int ret = 0;
 	char line[2000];
 	bool vanilla = opt.getFlag("vanilla");
-	int bufSize = opt.getIntValue("buffersize", 100);
+	int bufSize = opt.getIntValue("buffersize", 0);
+	bool randomShots = (bufSize == 0);
+	int numResults = opt.getIntValue("numresults", 10);
+	int minSize = opt.getIntValue("minsize", 0);
+	int maxSize = opt.getIntValue("maxsize", 729);
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
 		if(vanilla) {
 			pm.fromChars81(line);
-			char curPuz[88];
-			for(int i = 0; i < 81; i++) curPuz[i] = (line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
-			minimizer::minimizePencilmarks(curPuz, bufSize);
+			//char curPuz[88];
+			//for(int i = 0; i < 81; i++) curPuz[i] = (line[i] <= '9' && line[i] > '0' ? line[i] - '0' : 0);
+			//minimizer::minimizePencilmarks(curPuz, bufSize);
 		}
 		else {
 			if(!pm.fromChars729(line)) {
 				ret = 1;
 				continue;
 			}
+			//minimizer::minimizePencilmarks(pm, bufSize);
+		}
+		if(randomShots) {
+			minimizer::minimizeRandom(pm, numResults, minSize, maxSize);
+		}
+		else {
 			minimizer::minimizePencilmarks(pm, bufSize);
 		}
 	}

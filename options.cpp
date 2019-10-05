@@ -49,8 +49,14 @@ options::options() {
 	anyopt.setCommandFlag("minimizerandom");
 	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	//anyopt.setCommandFlag("vanilla");
-	anyopt.addUsage("   --buffersize <n>      Number of random subgrids processed in each pass (100)");
+	anyopt.addUsage("   --buffersize <n>      Breadth search <n> subgrids are passed to next stage (default 0=disable)");
 	anyopt.setOption("buffersize");
+	anyopt.addUsage("   --numresults <n>        Random search, stop after <n> puzzles are generated (10)");
+	anyopt.setOption("numresults");
+	anyopt.addUsage("     --minsize <n>         Ignore puzzles smaller than <n> restrictions (0)");
+	anyopt.setOption("minsize");
+	anyopt.addUsage("     --maxsize <n>         Ignore puzzles larger than <n> restrictions (729)");
+	anyopt.setOption("maxsize");
 
 	anyopt.addUsage("");
 

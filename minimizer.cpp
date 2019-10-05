@@ -126,7 +126,7 @@ void minimizer::minimizeVanilla(char *puz) {
 		prevPass.swap(curPass);
 	} while(!prevPass.empty());
 }
-void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
+void minimizer::minimizePencilmarks(const char *puz, int bufferSize) {
 	char sol[88];
 	{
 		fsss2::getSingleSolution ss;
@@ -157,7 +157,7 @@ void minimizer::minimizePencilmarks(char *puz, int bufferSize) {
 	}
 	minimizePencilmarks(original, sol, bufferSize);
 }
-void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions, int bufferSize) {
+void minimizer::minimizePencilmarks(const pencilmarks& forbiddenValuePositions, int bufferSize) {
 	char sol[88];
 	{
 		fsss2::getSingleSolution ss;
@@ -346,6 +346,84 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 //		prevPass.swap(curPass);
 //	} while(!prevPass.empty());
 //}
+#include <unistd.h>
+void minimizer::minimizeRandom(const pencilmarks& forbiddenValuePositions, int numResults, int minSize, int maxSize) {
+	sleep(10);
+	int startSize = forbiddenValuePositions.popcount();
+	int minCluesToRemove = startSize - maxSize;
+	//if(minCluesToRemove <= 0) return;
+	int maxCluesToRemove = startSize - minSize;
+	if(maxCluesToRemove <= 0) return;
+	if(maxCluesToRemove < minCluesToRemove) return;
+	char sol[88];
+	{
+		fsss2::getSingleSolution ss;
+		int nSol = ss.solve(forbiddenValuePositions, sol);
+		if(1 != nSol) {
+			fprintf(stderr, "Nsol=%d\n", nSol);
+			return; //silently ignore invalid or multiple-solution puzzles
+		}
+	}
+    std::random_device rd;
+    std::mt19937 g(rd());
+	std::pair<int, int> seq[729];
+	for(int d = 0, i = 0; d < 9; d++) {
+		for(int c = 0; c < 81; c++, i++) {
+			seq[i].first = d;
+			seq[i].second = c;
+		}
+	}
+	pencilmarks knownInitiallyNonRedundant;
+	knownInitiallyNonRedundant.clear();
+	int numPuzzles = 0;
+	fsss2::isRedundant redundancyTester;
+	while(numPuzzles < numResults) {
+		restart:
+		pencilmarks pm(forbiddenValuePositions); //start from initial puzzle
+		std::shuffle(seq, seq + 729, g); //compose a random sequence for the order of the pencilmarks removal
+		//at this point we have fixed the clues. Now we have to add them until a minimal puzzle in size range appears or to cancel.
+		int seqIndex = 0;
+		int numRemovedClues = 0;
+		for(; numRemovedClues <= maxCluesToRemove + 1 && seqIndex < 729; seqIndex++) {
+			if(minCluesToRemove > 729 - seqIndex + numRemovedClues) goto restart; //we wouldn't succeed even if all the rest are removed
+			int d = seq[seqIndex].first;
+			int c = seq[seqIndex].second;
+			if(!pm[d].isBitSet(c)) continue; //initially cleared
+			if(knownInitiallyNonRedundant[d].isBitSet(c)) continue; //previously determined as non-redundant
+			if(!redundancyTester.solve(pm, d, c)) { //isn't redundant
+				if(numRemovedClues == 0) {
+					knownInitiallyNonRedundant[d].setBit(c); //store for eventual reuse on next attempts
+				}
+				continue;
+			}
+			pm[d].clearBit(c);
+			numRemovedClues++;
+		}
+		//we removed everything possible (according to our rules)
+		if(numRemovedClues < minCluesToRemove) continue; //cancel this attempt
+		if(numRemovedClues > maxCluesToRemove) continue; //cancel this attempt
+		//check the rest of the puzzle for minimality
+		if(!pm.isDisjoint(knownInitiallyNonRedundant)) goto restart;
+		for(; seqIndex < 729; seqIndex++) { //all other clues are already checked
+			int d = seq[seqIndex].first;
+			int c = seq[seqIndex].second;
+			if(pm[d].isBitSet(c)) {
+				if(knownInitiallyNonRedundant[d].isBitSet(c)) { //previously determined as non-redundant
+					goto restart;
+				}
+				if(redundancyTester.solve(pm, d, c)) { //is redundant but we are out of the size limits
+					goto restart;
+				}
+			}
+		}
+		//reduction and minimality tests passed. Export.
+		char buf[730];
+		pm.toChars729(buf);
+		printf("%729.729s\t%d\n", buf, startSize - numRemovedClues);
+		fflush(NULL);
+		numPuzzles++;
+	}
+}
 void minimizer::reduceM2P1(const char* p) {
 	complementaryPencilmarksX src;
 	if(!src.fromChars2(p)) return; //silently ignore invalid inputs
