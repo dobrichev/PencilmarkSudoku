@@ -42,6 +42,8 @@ int transform::cmdMinimizeRandom() {
 	int numResults = opt.getIntValue("numresults", 10);
 	int minSize = opt.getIntValue("minsize", 0);
 	int maxSize = opt.getIntValue("maxsize", 729);
+	int maxAttempts = opt.getIntValue("maxattempts", INT_MAX);
+	int maxRetries = opt.getIntValue("maxretries", INT_MAX);
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
 		if(vanilla) {
@@ -58,7 +60,7 @@ int transform::cmdMinimizeRandom() {
 			//minimizer::minimizePencilmarks(pm, bufSize);
 		}
 		if(randomShots) {
-			minimizer::minimizeRandom(pm, numResults, minSize, maxSize);
+			minimizer::minimizeRandom(pm, numResults, minSize, maxSize, maxAttempts, maxRetries);
 		}
 		else {
 			minimizer::minimizePencilmarks(pm, bufSize);
