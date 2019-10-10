@@ -59,7 +59,7 @@ options::options() {
 	anyopt.setOption("maxsize");
 	anyopt.addUsage("     --maxattempts <n>     Max attempts per input (INT_MAX)");
 	anyopt.setOption("maxattempts");
-	anyopt.addUsage("     --maxretries <n>      Max subsequent unsuccessfull attempts per input (INT_MAX)");
+	anyopt.addUsage("     --maxretries <n>      Max subsequent unsuccessful attempts per input (INT_MAX)");
 	anyopt.setOption("maxretries");
 
 	anyopt.addUsage("");

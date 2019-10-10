@@ -355,15 +355,15 @@ void minimizer::minimizeRandom(const pencilmarks& forbiddenValuePositions, int n
 	int maxCluesToRemove = startSize - minSize;
 	if(maxCluesToRemove <= 0) return;
 	if(maxCluesToRemove < minCluesToRemove) return;
-	char sol[88];
-	{
-		fsss2::getSingleSolution ss;
-		int nSol = ss.solve(forbiddenValuePositions, sol);
-		if(1 != nSol) {
-			fprintf(stderr, "Nsol=%d\n", nSol);
-			return; //silently ignore invalid or multiple-solution puzzles
-		}
-	}
+//	char sol[88];
+//	{
+//		fsss2::getSingleSolution ss;
+//		int nSol = ss.solve(forbiddenValuePositions, sol);
+//		if(1 != nSol) {
+//			fprintf(stderr, "Nsol=%d\n", nSol);
+//			return; //silently ignore invalid or multiple-solution puzzles
+//		}
+//	}
     std::random_device rd;
     std::mt19937 g(rd());
 	std::pair<int, int> seq[729];
@@ -423,12 +423,12 @@ restart:
 		//reduction and minimality tests passed. Export.
 		numRetries = 0; //reset on each successfull attempt
 
-		//debug double check
-		fsss2::hasSingleSolution ss;
-		if(1 != ss.solve(pm)) {
-			fprintf(stderr, "error\n");
-			continue;
-		}
+//		//debug double check
+//		fsss2::hasSingleSolution ss;
+//		if(1 != ss.solve(pm)) {
+//			fprintf(stderr, "error\n");
+//			continue;
+//		}
 
 		char buf[730];
 		pm.toChars729(buf);
