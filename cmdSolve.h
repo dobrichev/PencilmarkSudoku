@@ -21,7 +21,7 @@ class cmdSolve {
 private:
 public:
 	int exec();
-	static void getFirstRedundantConstraint(const char* sol, const pencilmarks& forbiddenValuePositions, int& val, int& cell);
+	static void getFirstRedundantConstraint(const pencilmarks& forbiddenValuePositions, int& val, int& cell);
 };
 
 #endif /* CMDSOLVE_H_ */

@@ -32,28 +32,34 @@ int cmdSolve::exec() {
 				continue;
 			}
 		}
+		pm.toChars729(outPuz);
 		if(count) {
 			pencilmarks respm;
 			char outPm[729];
 			int numSol = ms.solve(pm, respm, maxSolutionCount);
 			respm.fromSolver();
-			pm.toChars729(outPuz);
 			respm.toChars729(outPm);
 			printf("%729.729s\t%d\t%729.729s\n", outPuz, numSol, outPm);
 		}
 		else {
-			if(1 != ss.solve(pm, sol)) {
-				ret = 1;
-				continue;
+			int numSol = ss.solve(pm, sol);
+			switch(numSol) {
+				case 0:
+					printf("%729.729s\tInvalid\n", outPuz);
+					ret = 1;
+					goto nextInput;
+				case 2:
+					printf("%729.729s\tMultiple\n", outPuz);
+					ret = 1;
+					goto nextInput;
 			}
-			pm.toChars729(outPuz);
 			for(int i = 0; i < 81; i++) {
 				sol[i] += '0';
 			}
 			if(minimals) {
 				int val = -1;
 				int cell;
-				getFirstRedundantConstraint(sol, pm, val, cell);
+				getFirstRedundantConstraint(pm, val, cell);
 				if(val == -1) {
 					printf("%729.729s\t%81.81s\tMinimal\n", outPuz, sol);
 				}
@@ -65,10 +71,11 @@ int cmdSolve::exec() {
 				printf("%729.729s\t%81.81s\n", outPuz, sol);
 			}
 		}
+		nextInput:;
 	}
 	return ret;
 }
-void cmdSolve::getFirstRedundantConstraint(const char* sol, const pencilmarks& forbiddenValuePositions, int& val, int& cell) {
+void cmdSolve::getFirstRedundantConstraint(const pencilmarks& forbiddenValuePositions, int& val, int& cell) {
 	fsss2::hasSingleSolution sss;
 	for(int d = 0; d < 9; d++) {
 		for(int c = 0; c < 81; c++) {
