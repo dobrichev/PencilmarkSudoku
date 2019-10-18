@@ -68,4 +68,35 @@ int transform::cmdMinimizeRandom() {
 	}
 	return ret;
 }
+int transform::cmdMaximizeRandom() {
+	int ret = 0;
+	char line[2000];
+	int numResults = opt.getIntValue("numresults", 10);
+	int minImprovement = opt.getIntValue("minimprovement", 1);
+	int maxAttempts = opt.getIntValue("maxattempts", INT_MAX);
+	int maxRetries = opt.getIntValue("maxretries", INT_MAX);
+	int numCluesToAdd = opt.getIntValue("addclues", 9);
+	int numAddAttempts = opt.getIntValue("addattempts", 600);
+	fsss2::getAnySolution solver;
+	char sol[88];
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(!pm.fromChars729(line)) {
+			ret = 1;
+			continue;
+		}
+		if(!solver.solve(pm, sol)) {
+			ret = 1;
+			continue; //silently ignore invalid puzzles
+		}
+		int minSize = pm.popcount() + minImprovement;
+		for(int i = 0; i < numAddAttempts; i++) {
+			pencilmarks pm1(pm);
+			minimizer::addRandomRestrictions(pm1, sol, numCluesToAdd);
+			minimizer::minimizeRandom(pm1, numResults, minSize, 729, maxAttempts, maxRetries);
+		}
+	}
+	return ret;
+}
+
 

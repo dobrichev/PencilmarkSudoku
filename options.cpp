@@ -62,6 +62,21 @@ options::options() {
 	anyopt.addUsage("     --maxretries <n>      Max subsequent unsuccessful attempts per input (INT_MAX)");
 	anyopt.setOption("maxretries");
 
+	anyopt.addUsage(" --maximizerandom    Add then remove all redundant constraints from valid puzzles randomly");
+	anyopt.setCommandFlag("maximizerandom");
+	anyopt.addUsage("   --addclues <n>        Add randomly <n> redundant clues to original (9)");
+	anyopt.setOption("addclues");
+	anyopt.addUsage("   --addattempts <n>     Repeat adding redundant clues <n> times (600)");
+	anyopt.setOption("addattempts");
+	anyopt.addUsage("   --minimprovement <n>  Ignore generated puzzles of size < original + <n> (1)");
+	anyopt.setOption("minimprovement");
+	anyopt.addUsage("   --maxattempts <n>     Max reduce attempts per add attempt (INT_MAX)");
+	//anyopt.setOption("maxattempts");
+	anyopt.addUsage("   --maxretries <n>      Max reduce subsequent unsuccessful attempts per add attempt (INT_MAX)");
+	//anyopt.setOption("maxretries");
+	anyopt.addUsage("   --numresults <n>      Stop after <n> puzzles are generated per add attempt (10)");
+	//anyopt.setOption("numresults");
+
 	anyopt.addUsage("");
 
 	//by default all  options  will be checked on the command line and from option/resource file
@@ -136,6 +151,9 @@ int options::execCommand() {
 	}
 	if(anyopt.getFlag("minimizerandom")) {
 		return transform::cmdMinimizeRandom();
+	}
+	if(anyopt.getFlag("maximizerandom")) {
+		return transform::cmdMaximizeRandom();
 	}
 	cout << "Error: No command specified." << endl;
 	return -1;

@@ -437,6 +437,24 @@ restart:
 		numPuzzles++;
 	}
 }
+
+void minimizer::addRandomRestrictions(pencilmarks& forbiddenValuePositions, const char* sol, int numRestrictionsToAdd) {
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::uniform_int_distribution<int> uni(0, 728);
+
+    for(int todo = numRestrictionsToAdd; todo; todo--) {
+    	int digit;
+    	int cell;
+    	do { //here is easy to enter infinite loop requesting too high numRestrictionsToAdd but who cares.
+			int clue = uni(g);
+			digit = clue / 81;
+			cell = clue % 81;
+    	} while (sol[cell] == digit + 1 || forbiddenValuePositions[digit].isBitSet(cell)); //repeat until non-forbidden non-solution pencilmark is hit
+    	forbiddenValuePositions[digit].setBit(cell);
+    }
+}
+
 void minimizer::reduceM2P1(const char* p) {
 	complementaryPencilmarksX src;
 	if(!src.fromChars2(p)) return; //silently ignore invalid inputs

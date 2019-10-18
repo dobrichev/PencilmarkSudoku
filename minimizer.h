@@ -204,6 +204,7 @@ struct minimizer {
 	static void minimizePencilmarks(const pencilmarks& puz, int bufferSize); //expand the pencilmarks for single-solution puzzle
 	static void minimizePencilmarks(const complementaryPencilmarksX& original, const char* sol, int bufferSize);
 	static void minimizeRandom(const pencilmarks& forbiddenValuePositions, int numResults, int minSize, int maxSize, int maxAttempts, int maxRetries);
+	static void addRandomRestrictions(pencilmarks& forbiddenValuePositions, const char* sol, int numRestrictionsToAdd);
 
 	void reduceM2P1(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle
 	void reduceM2P1v2(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle

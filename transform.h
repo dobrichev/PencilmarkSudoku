@@ -9,5 +9,6 @@
 struct transform {
 	static int cmdSolRowMinLex();
 	static int cmdMinimizeRandom();
+	static int cmdMaximizeRandom();
 };
 #endif //TRANSFORM_H_
