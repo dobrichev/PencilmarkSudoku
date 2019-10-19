@@ -11,6 +11,7 @@ struct transform {
 	static int cmdMinimizeRandom();
 	static int cmdMaximizeRandom();
 	static int cmdAddRedundant();
+	static int cmdRemoveClues();
 	static int cmdSize();
 };
 #endif //TRANSFORM_H_

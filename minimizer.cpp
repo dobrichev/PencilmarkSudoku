@@ -480,6 +480,26 @@ void minimizer::addClues(pencilmarks& pm, const char* sol, int numCluesToAdd, in
 	}
 }
 
+void minimizer::removeClues(pencilmarks& pm, int numCluesToRemove, int start) {
+	if(numCluesToRemove) {
+		pencilmarks pm1(pm);
+		for(int i = start; i < 729 + 1 - numCluesToRemove; i++) {
+			int digit = i / 81;
+			int cell = i % 81;
+			if(!pm1[digit].isBitSet(cell)) continue; //already removed
+			pm1[digit].clearBit(cell);
+			removeClues(pm1, numCluesToRemove - 1, i + 1);
+			pm1[digit].setBit(cell);
+		}
+	}
+	else {
+		char buf[730];
+		pm.toChars729(buf);
+		printf("%729.729s\n", buf);
+		//fflush(NULL);
+	}
+}
+
 void minimizer::reduceM2P1(const char* p) {
 	complementaryPencilmarksX src;
 	if(!src.fromChars2(p)) return; //silently ignore invalid inputs

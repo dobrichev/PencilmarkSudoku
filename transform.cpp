@@ -101,7 +101,7 @@ int transform::cmdMaximizeRandom() {
 int transform::cmdAddRedundant() {
 	int ret = 0;
 	char line[2000];
-	int numCluesToAdd = opt.getIntValue("addclues", 1);
+	int numCluesToAdd = opt.getIntValue("numclues", 1);
 	if(numCluesToAdd <= 0) return 1;
 	fsss2::getAnySolution solver;
 	char sol[88];
@@ -116,6 +116,22 @@ int transform::cmdAddRedundant() {
 			continue; //silently ignore invalid puzzles
 		}
 		minimizer::addClues(pm, sol, numCluesToAdd, 0);
+		fflush(NULL);
+	}
+	return ret;
+}
+int transform::cmdRemoveClues() {
+	int ret = 0;
+	char line[2000];
+	int numCluesToRemove = opt.getIntValue("numclues", 1);
+	if(numCluesToRemove <= 0) return 1;
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(!pm.fromChars729(line)) {
+			ret = 1;
+			continue;
+		}
+		minimizer::removeClues(pm, numCluesToRemove, 0);
 		fflush(NULL);
 	}
 	return ret;

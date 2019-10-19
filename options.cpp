@@ -79,8 +79,13 @@ options::options() {
 
 	anyopt.addUsage(" --addredundantclues Add redundant constraints to valid puzzles in all possible ways");
 	anyopt.setCommandFlag("addredundantclues");
-	anyopt.addUsage("   --addclues <n>        Add <n> redundant clues to the original (1)");
-	//anyopt.setOption("addclues");
+	anyopt.addUsage("   --numclues <n>        Add <n> redundant clues to the original (1)");
+	anyopt.setOption("numclues");
+
+	anyopt.addUsage(" --removeclues       Remove constraints in all possible ways");
+	anyopt.setCommandFlag("removeclues");
+	anyopt.addUsage("   --numclues <n>        Remove <n> constraints from the original (1)");
+	anyopt.setOption("numclues");
 
 	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
 	anyopt.setCommandFlag("size");
@@ -165,6 +170,9 @@ int options::execCommand() {
 	}
 	if(anyopt.getFlag("addredundantclues")) {
 		return transform::cmdAddRedundant();
+	}
+	if(anyopt.getFlag("removeclues")) {
+		return transform::cmdRemoveClues();
 	}
 	if(anyopt.getFlag("size")) {
 		return transform::cmdSize();
