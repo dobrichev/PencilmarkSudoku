@@ -51,15 +51,15 @@ options::options() {
 	//anyopt.setCommandFlag("vanilla");
 	anyopt.addUsage("   --buffersize <n>      Breadth search <n> subgrids are passed to next stage (default 0=disable)");
 	anyopt.setOption("buffersize");
-	anyopt.addUsage("   --numresults <n>        Random search, stop after <n> puzzles are generated (10)");
+	anyopt.addUsage("   --numresults <n>      Stop after <n> puzzles are generated (10)");
 	anyopt.setOption("numresults");
-	anyopt.addUsage("     --minsize <n>         Ignore puzzles smaller than <n> restrictions (0)");
+	anyopt.addUsage("   --minsize <n>         Ignore puzzles smaller than <n> restrictions (0)");
 	anyopt.setOption("minsize");
-	anyopt.addUsage("     --maxsize <n>         Ignore puzzles larger than <n> restrictions (729)");
+	anyopt.addUsage("   --maxsize <n>         Ignore puzzles larger than <n> restrictions (729)");
 	anyopt.setOption("maxsize");
-	anyopt.addUsage("     --maxattempts <n>     Max attempts per input (INT_MAX)");
+	anyopt.addUsage("     --maxattempts <n>     Max attempts per input (INT_MAX) for buffersize=0");
 	anyopt.setOption("maxattempts");
-	anyopt.addUsage("     --maxretries <n>      Max subsequent unsuccessful attempts per input (INT_MAX)");
+	anyopt.addUsage("     --maxretries <n>      Max subsequent unsuccessful attempts per input (INT_MAX) for buffersize=0");
 	anyopt.setOption("maxretries");
 
 	anyopt.addUsage(" --maximizerandom    Add then remove all redundant constraints from valid puzzles randomly");
@@ -76,6 +76,14 @@ options::options() {
 	//anyopt.setOption("maxretries");
 	anyopt.addUsage("   --numresults <n>      Stop after <n> puzzles are generated per add attempt (10)");
 	//anyopt.setOption("numresults");
+
+	anyopt.addUsage(" --addredundantclues Add redundant constraints to valid puzzles in all possible ways");
+	anyopt.setCommandFlag("addredundantclues");
+	anyopt.addUsage("   --addclues <n>        Add <n> redundant clues to the original (1)");
+	//anyopt.setOption("addclues");
+
+	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
+	anyopt.setCommandFlag("size");
 
 	anyopt.addUsage("");
 
@@ -154,6 +162,12 @@ int options::execCommand() {
 	}
 	if(anyopt.getFlag("maximizerandom")) {
 		return transform::cmdMaximizeRandom();
+	}
+	if(anyopt.getFlag("addredundantclues")) {
+		return transform::cmdAddRedundant();
+	}
+	if(anyopt.getFlag("size")) {
+		return transform::cmdSize();
 	}
 	cout << "Error: No command specified." << endl;
 	return -1;

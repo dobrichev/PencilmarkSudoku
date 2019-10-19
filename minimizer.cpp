@@ -126,7 +126,7 @@ void minimizer::minimizeVanilla(char *puz) {
 		prevPass.swap(curPass);
 	} while(!prevPass.empty());
 }
-void minimizer::minimizePencilmarks(const char *puz, int bufferSize) {
+void minimizer::minimizePencilmarks(const char *puz, int bufferSize, int numResults, int minSize, int maxSize) {
 	char sol[88];
 	{
 		fsss2::getSingleSolution ss;
@@ -155,9 +155,9 @@ void minimizer::minimizePencilmarks(const char *puz, int bufferSize) {
 			}
 		}
 	}
-	minimizePencilmarks(original, sol, bufferSize);
+	minimizePencilmarks(original, sol, bufferSize, numResults, minSize, maxSize);
 }
-void minimizer::minimizePencilmarks(const pencilmarks& forbiddenValuePositions, int bufferSize) {
+void minimizer::minimizePencilmarks(const pencilmarks& forbiddenValuePositions, int bufferSize, int numResults, int minSize, int maxSize) {
 	char sol[88];
 	{
 		fsss2::getSingleSolution ss;
@@ -173,25 +173,26 @@ void minimizer::minimizePencilmarks(const pencilmarks& forbiddenValuePositions, 
 	for(int c = 0; c < 81; c++) {
 		original.fixedValuePositions[sol[c] - 1].setBit(c); //don't disallow the target solution
 	}
-	minimizePencilmarks(original, sol, bufferSize);
+	minimizePencilmarks(original, sol, bufferSize, numResults, minSize, maxSize);
 }
-void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, const char* sol, int bufferSize) {
-	int numPencilmarks = 81 * 9 - original.forbiddenValuePositions.popcount();
+void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, const char* sol, int bufferSize, int numResults, int minSize, int maxSize) {
+	int numConstraints = original.forbiddenValuePositions.popcount();
 	int numPasses = 0;
+	if(numResults == 0) numResults = INT_MAX;
 	std::set<complementaryPencilmarksX> previousPass;
 	std::set<complementaryPencilmarksX> currentPass;
 
 	previousPass.insert(original); //all initial constraints, known non-redundant constrains only for initial givens that must survive for the solution
 
 	fsss2::isRedundant redundancyTester;
-	size_t numMinimals = 0;
+	int numMinimals = 0;
 	auto rg(std::mt19937{std::random_device{}()});
 	//auto rg(std::mt19937{});
 	//auto rg(std::mt19937{0});
 
 	do { //while the previous pass returns puzzles do a next pass
 		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
-		fprintf(stderr, "Pass %d, maximizing %d pencilmarks. Parent list is of size\t%d\n", numPasses++, numPencilmarks++, (int)previousPass.size());
+		fprintf(stderr, "Pass %d, minimizing %d constraints. Parent list is of size\t%d\n", numPasses++, numConstraints--, (int)previousPass.size());
 		for(int currDigit = 8; currDigit >= 0; currDigit--) { //iterate digits
 			for(int currCell = 80; currCell >=0; currCell--) { //iterate cells in reverse order
 				if(!original.isForRemoval(currDigit, currCell))
@@ -208,7 +209,7 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 								current.getFixedFrom(parent);
 								current.markAsFixed(currDigit, currCell);
 								currentPass.insert(current); //store it to avoid duplicate processing later in this pass
-								if(current.isMinimal()) {
+								if(numConstraints <= maxSize && numConstraints >= minSize && current.isMinimal()) {
 									//there are no more givens to remove => current is a minimal puzzle
 									//printf("c");
 									numMinimals++;
@@ -217,13 +218,14 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 									//current.dump2();
 									char buf[730];
 									current.forbiddenValuePositions.toChars729(buf);
-									printf("%729.729s\t%d\n", buf, 729 - numPencilmarks);
+									printf("%729.729s\t%d\n", buf, numConstraints);
+									if(numMinimals == numResults) goto exit;
 								}
 							}
 							else {
 								const_cast<complementaryPencilmarksX&>(parent).markAsFixed(currDigit, currCell); //mark the clue as known non-redundant in this context to avoid duplicate checking later
-								if(parent.isMinimal()) {
-									//there are no more givens to remove => parent is proven minimal puzzle
+								if(numConstraints < maxSize && parent.isMinimal()) {
+									//there are no more givens to remove => parent is proven minimal puzzle of size numConstraints + 1
 									//printf("p");
 									numMinimals++;
 									if(!parent.isMinimalUniqueDoubleCheck(sol)) return;
@@ -231,7 +233,8 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 									//parent.dump2();
 									char buf[730];
 									parent.forbiddenValuePositions.toChars729(buf);
-									printf("%729.729s\t%d\n", buf, 729 - numPencilmarks);
+									printf("%729.729s\t%d\n", buf, numConstraints + 1);
+									if(numMinimals == numResults) goto exit;
 								}
 								continue; //continue with next parent
 							}
@@ -247,8 +250,9 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 		std::experimental::sample(std::begin(currentPass), std::end(currentPass), std::inserter(previousPass, previousPass.end()), bufferSize, rg); //gcc-specific
 		currentPass.clear();
 		fflush(NULL);
-	} while(!previousPass.empty());
-	fprintf(stderr, "\nMinimals found = %lu\n", numMinimals);
+	} while(!previousPass.empty() && numConstraints >= minSize);
+	exit:
+	fprintf(stderr, "\nMinimals found = %d\n", numMinimals);
 }
 //void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions, int bufferSize) {
 //	char sol[88];
@@ -453,6 +457,27 @@ void minimizer::addRandomRestrictions(pencilmarks& forbiddenValuePositions, cons
     	} while (sol[cell] == digit + 1 || forbiddenValuePositions[digit].isBitSet(cell)); //repeat until non-forbidden non-solution pencilmark is hit
     	forbiddenValuePositions[digit].setBit(cell);
     }
+}
+
+void minimizer::addClues(pencilmarks& pm, const char* sol, int numCluesToAdd, int start) {
+	if(numCluesToAdd) {
+		pencilmarks pm1(pm);
+		for(int i = start; i < 729 + 1 - numCluesToAdd; i++) {
+			int digit = i / 81;
+			int cell = i % 81;
+			if(sol[cell] == digit + 1) continue; //don't disable solution pencilmarks
+			if(pm1[digit].isBitSet(cell)) continue; //already forbidden
+			pm1[digit].setBit(cell);
+			addClues(pm1, sol, numCluesToAdd - 1, i + 1);
+			pm1[digit].clearBit(cell);
+		}
+	}
+	else {
+		char buf[730];
+		pm.toChars729(buf);
+		printf("%729.729s\n", buf);
+		//fflush(NULL);
+	}
 }
 
 void minimizer::reduceM2P1(const char* p) {

@@ -63,7 +63,7 @@ int transform::cmdMinimizeRandom() {
 			minimizer::minimizeRandom(pm, numResults, minSize, maxSize, maxAttempts, maxRetries);
 		}
 		else {
-			minimizer::minimizePencilmarks(pm, bufSize);
+			minimizer::minimizePencilmarks(pm, bufSize, numResults, minSize, maxSize);
 		}
 	}
 	return ret;
@@ -95,6 +95,43 @@ int transform::cmdMaximizeRandom() {
 			minimizer::addRandomRestrictions(pm1, sol, numCluesToAdd);
 			minimizer::minimizeRandom(pm1, numResults, minSize, 729, maxAttempts, maxRetries);
 		}
+	}
+	return ret;
+}
+int transform::cmdAddRedundant() {
+	int ret = 0;
+	char line[2000];
+	int numCluesToAdd = opt.getIntValue("addclues", 1);
+	if(numCluesToAdd <= 0) return 1;
+	fsss2::getAnySolution solver;
+	char sol[88];
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(!pm.fromChars729(line)) {
+			ret = 1;
+			continue;
+		}
+		if(!solver.solve(pm, sol)) {
+			ret = 1;
+			continue; //silently ignore invalid puzzles
+		}
+		minimizer::addClues(pm, sol, numCluesToAdd, 0);
+		fflush(NULL);
+	}
+	return ret;
+}
+int transform::cmdSize() {
+	int ret = 0;
+	char line[2000];
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(!pm.fromChars729(line)) {
+			ret = 1;
+			continue;
+		}
+		char outPuz[729];
+		pm.toChars729(outPuz);
+		printf("%729.729s\t%d\n", outPuz, pm.popcount());
 	}
 	return ret;
 }

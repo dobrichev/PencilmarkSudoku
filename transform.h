@@ -10,5 +10,7 @@ struct transform {
 	static int cmdSolRowMinLex();
 	static int cmdMinimizeRandom();
 	static int cmdMaximizeRandom();
+	static int cmdAddRedundant();
+	static int cmdSize();
 };
 #endif //TRANSFORM_H_
