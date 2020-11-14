@@ -9,6 +9,7 @@
 #include "cmdSolve.h"
 #include "options.h"
 #include "fsss2.h"
+#include "templates.h"
 
 int cmdSolve::exec() {
 	bool minimals = opt.getFlag("minimals");
@@ -42,6 +43,7 @@ int cmdSolve::exec() {
 			printf("%729.729s\t%d\t%729.729s\n", outPuz, numSol, outPm);
 		}
 		else {
+			//int numSol = templates::solve(pm, sol);
 			int numSol = ss.solve(pm, sol);
 			switch(numSol) {
 				case 0:

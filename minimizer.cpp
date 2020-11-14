@@ -480,6 +480,33 @@ void minimizer::addClues(pencilmarks& pm, const char* sol, int numCluesToAdd, in
 	}
 }
 
+void minimizer::addCluesAnyGrid(pencilmarks& pm, int numCluesToAdd, int start) {
+	if(numCluesToAdd) {
+		fsss2::hasAnySolution as;
+		if(1 == as.solve(pm)) {
+			pencilmarks pm1(pm);
+			for(int i = start; i < 729 + 1 - numCluesToAdd; i++) {
+				int digit = i / 81;
+				int cell = i % 81;
+				//if(sol[cell] == digit + 1) continue; //don't disable solution pencilmarks
+				if(pm1[digit].isBitSet(cell)) continue; //already forbidden
+				pm1[digit].setBit(cell);
+				addCluesAnyGrid(pm1, numCluesToAdd - 1, i + 1);
+				pm1[digit].clearBit(cell);
+			}
+		}
+	}
+	else {
+		fsss2::hasSingleSolution ss;
+		if(1 == ss.solve(pm)) {
+			char buf[730];
+			pm.toChars729(buf);
+			printf("%729.729s\n", buf);
+			fflush(NULL);
+		}
+	}
+}
+
 void minimizer::removeClues(pencilmarks& pm, int numCluesToRemove, int start) {
 	if(numCluesToRemove) {
 		pencilmarks pm1(pm);

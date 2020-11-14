@@ -64,8 +64,8 @@ options::options() {
 
 	anyopt.addUsage(" --maximizerandom    Add then remove all redundant constraints from valid puzzles randomly");
 	anyopt.setCommandFlag("maximizerandom");
-	anyopt.addUsage("   --addclues <n>        Add randomly <n> redundant clues to original (9)");
-	anyopt.setOption("addclues");
+	anyopt.addUsage("   --numclues <n>        Add randomly <n> redundant clues to original (9)");
+	anyopt.setOption("numclues");
 	anyopt.addUsage("   --addattempts <n>     Repeat adding redundant clues <n> times (600)");
 	anyopt.setOption("addattempts");
 	anyopt.addUsage("   --minimprovement <n>  Ignore generated puzzles of size < original + <n> (1)");
@@ -80,12 +80,17 @@ options::options() {
 	anyopt.addUsage(" --addredundantclues Add redundant constraints to valid puzzles in all possible ways");
 	anyopt.setCommandFlag("addredundantclues");
 	anyopt.addUsage("   --numclues <n>        Add <n> redundant clues to the original (1)");
-	anyopt.setOption("numclues");
+	//anyopt.setOption("numclues");
 
 	anyopt.addUsage(" --removeclues       Remove constraints in all possible ways");
 	anyopt.setCommandFlag("removeclues");
 	anyopt.addUsage("   --numclues <n>        Remove <n> constraints from the original (1)");
-	anyopt.setOption("numclues");
+	//anyopt.setOption("numclues");
+
+	anyopt.addUsage(" --addclues          Add constraints in all possible ways returning only valid puzzles");
+	anyopt.setCommandFlag("addclues");
+	anyopt.addUsage("   --numclues <n>        Add <n> constraints to the original (1)");
+	//anyopt.setOption("numclues");
 
 	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
 	anyopt.setCommandFlag("size");
@@ -174,10 +179,13 @@ int options::execCommand() {
 	if(anyopt.getFlag("removeclues")) {
 		return transform::cmdRemoveClues();
 	}
+	if(anyopt.getFlag("addclues")) {
+		return transform::cmdAddClues();
+	}
 	if(anyopt.getFlag("size")) {
 		return transform::cmdSize();
 	}
-	cout << "Error: No command specified." << endl;
+	cerr << "Error: No command specified." << endl;
 	return -1;
 }
 

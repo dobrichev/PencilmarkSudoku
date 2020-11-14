@@ -75,7 +75,7 @@ int transform::cmdMaximizeRandom() {
 	int minImprovement = opt.getIntValue("minimprovement", 1);
 	int maxAttempts = opt.getIntValue("maxattempts", INT_MAX);
 	int maxRetries = opt.getIntValue("maxretries", INT_MAX);
-	int numCluesToAdd = opt.getIntValue("addclues", 9);
+	int numCluesToAdd = opt.getIntValue("numclues", 9);
 	int numAddAttempts = opt.getIntValue("addattempts", 600);
 	fsss2::getAnySolution solver;
 	char sol[88];
@@ -132,6 +132,22 @@ int transform::cmdRemoveClues() {
 			continue;
 		}
 		minimizer::removeClues(pm, numCluesToRemove, 0);
+		fflush(NULL);
+	}
+	return ret;
+}
+int transform::cmdAddClues() {
+	int ret = 0;
+	char line[2000];
+	int numCluesToAdd = opt.getIntValue("numclues", 1);
+	if(numCluesToAdd <= 0) return 1;
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(!pm.fromChars729(line)) {
+			ret = 1;
+			continue;
+		}
+		minimizer::addCluesAnyGrid(pm, numCluesToAdd, 0);
 		fflush(NULL);
 	}
 	return ret;
