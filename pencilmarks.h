@@ -16,6 +16,17 @@ struct pencilmarks {
 			pm[d].clear();
 		}
 	}
+	void clearBits(const pencilmarks& other) {
+		for(int d = 0; d < 9; d++) {
+			pm[d].clearBits(other[d]);
+		}
+	}
+	pencilmarks& operator |=(const pencilmarks& other) {
+		for(int d = 0; d < 9; d++) {
+			pm[d] |= other[d];
+		}
+		return *this;
+	}
 	int popcount() const {
 		int ret = 0;
 		for(int d = 0; d < 9; d++) {

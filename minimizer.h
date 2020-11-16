@@ -206,8 +206,11 @@ struct minimizer {
 	static void minimizeRandom(const pencilmarks& forbiddenValuePositions, int numResults, int minSize, int maxSize, int maxAttempts, int maxRetries);
 	static void addRandomRestrictions(pencilmarks& forbiddenValuePositions, const char* sol, int numRestrictionsToAdd);
 	static void addClues(pencilmarks& pm, const char* sol, int numCluesToAdd, int start = 0);
-	static void removeClues(pencilmarks& pm, int numCluesToRemove, int start = 0);
-	static void addCluesAnyGrid(pencilmarks& pm, int numCluesToAdd, int start = 0);
+	static void removeClues(const pencilmarks& pm, int numCluesToRemove, int maxSolutionCount);
+	static void removeClues(const pencilmarks& pm, int numCluesToRemove, int start, int maxSolutionCount, const pencilmarks& blackList);
+	static void addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, int start = 0);
+	static void addCluesAnyGridPreSolve(const pencilmarks& pm, int numCluesToAdd);
+	static void addCluesFromMask(const pencilmarks& pm, const pencilmarks& allSolutions, int numCluesToAdd, int start);
 
 	void reduceM2P1(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle
 	void reduceM2P1v2(pencilmarks& puz); //reduce forbidden placements for single-solution minimized puzzle

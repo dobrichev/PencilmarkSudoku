@@ -124,6 +124,7 @@ int transform::cmdRemoveClues() {
 	int ret = 0;
 	char line[2000];
 	int numCluesToRemove = opt.getIntValue("numclues", 1);
+	int maxSolutionCount = opt.getIntValue("maxsolutioncount", 0);
 	if(numCluesToRemove <= 0) return 1;
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
@@ -131,7 +132,7 @@ int transform::cmdRemoveClues() {
 			ret = 1;
 			continue;
 		}
-		minimizer::removeClues(pm, numCluesToRemove, 0);
+		minimizer::removeClues(pm, numCluesToRemove, maxSolutionCount);
 		fflush(NULL);
 	}
 	return ret;
@@ -141,14 +142,20 @@ int transform::cmdAddClues() {
 	char line[2000];
 	int numCluesToAdd = opt.getIntValue("numclues", 1);
 	if(numCluesToAdd <= 0) return 1;
+	bool presolve = opt.getFlag("presolve");
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
 		if(!pm.fromChars729(line)) {
 			ret = 1;
 			continue;
 		}
-		minimizer::addCluesAnyGrid(pm, numCluesToAdd, 0);
-		fflush(NULL);
+		if(presolve) {
+			minimizer::addCluesAnyGridPreSolve(pm, numCluesToAdd);
+		}
+		else {
+			minimizer::addCluesAnyGrid(pm, numCluesToAdd, 0);
+		}
+		//fflush(NULL);
 	}
 	return ret;
 }

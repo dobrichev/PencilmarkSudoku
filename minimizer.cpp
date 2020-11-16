@@ -480,7 +480,46 @@ void minimizer::addClues(pencilmarks& pm, const char* sol, int numCluesToAdd, in
 	}
 }
 
-void minimizer::addCluesAnyGrid(pencilmarks& pm, int numCluesToAdd, int start) {
+void minimizer::addCluesFromMask(const pencilmarks& pm, const pencilmarks& allSolutions, int numCluesToAdd, int start) {
+	bool noneChecked = true; //don't miss eventual minimal puzzle with less clues than requested
+	if(numCluesToAdd) {
+		pencilmarks pm1(pm);
+		for(int i = start; i < 729; i++) { //iterate to the end even more clues are expected to be added later - don't skip shorter valid puzzles
+			int digit = i / 81;
+			int cell = i % 81;
+			if(pm1[digit].isBitSet(cell)) continue; //already forbidden
+			if(allSolutions[digit].isBitSet(cell)) continue; // forbidden by mask
+			pm1[digit].setBit(cell);
+			addCluesFromMask(pm1, allSolutions, numCluesToAdd - 1, i + 1);
+			noneChecked = false;
+			pm1[digit].clearBit(cell);
+		}
+	}
+	if(noneChecked) {
+		fsss2::hasSingleSolution ss;
+		pencilmarks pm1(pm);
+		pm1 |= allSolutions; //help the solver being sure allSolutions is correct and covers right eliminations
+		if(1 == ss.solve(pm1)) {
+			char buf[730];
+			pm.toChars729(buf);
+			printf("%729.729s\n", buf);
+			fflush(NULL);
+		}
+	}
+}
+
+void minimizer::addCluesAnyGridPreSolve(const pencilmarks& pm, int numCluesToAdd) {
+	pencilmarks allSolutions;
+	fsss2::multiSolutionPM ms;
+//	int numSol = ms.solve(pm, allSolutions, 0); //this counts solutions and returns -1 on overflow
+//	if(numSol == -1) return; // > INT_MAX, skip
+//	if(numSol == 0) return; // save your time
+//	allSolutions.fromSolver(); //invert
+	ms.solve(pm, allSolutions); //this returns the number of redundant constraints
+	addCluesFromMask(pm, allSolutions, numCluesToAdd, 0); // iterate only unsolved pencilmarks
+}
+
+void minimizer::addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, int start) {
 	if(numCluesToAdd) {
 		fsss2::hasAnySolution as;
 		if(1 == as.solve(pm)) {
@@ -488,7 +527,6 @@ void minimizer::addCluesAnyGrid(pencilmarks& pm, int numCluesToAdd, int start) {
 			for(int i = start; i < 729 + 1 - numCluesToAdd; i++) {
 				int digit = i / 81;
 				int cell = i % 81;
-				//if(sol[cell] == digit + 1) continue; //don't disable solution pencilmarks
 				if(pm1[digit].isBitSet(cell)) continue; //already forbidden
 				pm1[digit].setBit(cell);
 				addCluesAnyGrid(pm1, numCluesToAdd - 1, i + 1);
@@ -507,7 +545,29 @@ void minimizer::addCluesAnyGrid(pencilmarks& pm, int numCluesToAdd, int start) {
 	}
 }
 
-void minimizer::removeClues(pencilmarks& pm, int numCluesToRemove, int start) {
+void minimizer::removeClues(const pencilmarks& pm, int numCluesToRemove, int maxSolutionCount) {
+	pencilmarks blackList;
+	blackList.clear();
+	pencilmarks pm1(pm);
+	if(maxSolutionCount > 0 && numCluesToRemove > 1) {
+		//compose a black list with constraints, that, removed alone, lead to > maxSolutionCount
+		fsss2::countSolutions cs;
+		for(int i = 0; i < 729; i++) {
+			int digit = i / 81;
+			int cell = i % 81;
+			if(!pm1[digit].isBitSet(cell)) continue; //already removed
+			pm1[digit].clearBit(cell);
+			pencilmarks allSolutions;
+			int numSol = cs.solve(pm1, maxSolutionCount); //this counts solutions and returns -1 on overflow
+			if(numSol <= 0) {
+				blackList[digit].setBit(cell);
+			}
+			pm1[digit].setBit(cell);
+		}
+	}
+	removeClues(pm, numCluesToRemove, 0, maxSolutionCount, blackList);
+}
+void minimizer::removeClues(const pencilmarks& pm, int numCluesToRemove, int start, int maxSolutionCount, const pencilmarks& blackList) {
 	if(numCluesToRemove) {
 		pencilmarks pm1(pm);
 		for(int i = start; i < 729 + 1 - numCluesToRemove; i++) {
@@ -515,14 +575,43 @@ void minimizer::removeClues(pencilmarks& pm, int numCluesToRemove, int start) {
 			int cell = i % 81;
 			if(!pm1[digit].isBitSet(cell)) continue; //already removed
 			pm1[digit].clearBit(cell);
-			removeClues(pm1, numCluesToRemove - 1, i + 1);
+			if(maxSolutionCount == 0) {
+				removeClues(pm1, numCluesToRemove - 1, i + 1, maxSolutionCount, blackList);
+			}
+			else if(!blackList[digit].isBitSet(cell)) {
+				if(numCluesToRemove > 1) {
+					fsss2::countSolutions cs;
+					int numSol = cs.solve(pm1, maxSolutionCount); //this counts solutions and returns -1 on overflow
+					if(numSol > 0) {
+						removeClues(pm1, numCluesToRemove - 1, i + 1, maxSolutionCount, blackList);
+					}
+				}
+				else {
+					removeClues(pm1, numCluesToRemove - 1, i + 1, maxSolutionCount, blackList);
+				}
+			}
 			pm1[digit].setBit(cell);
 		}
 	}
 	else {
-		char buf[730];
-		pm.toChars729(buf);
-		printf("%729.729s\n", buf);
+		if(maxSolutionCount == 0) {
+			char buf[730];
+			pm.toChars729(buf);
+			printf("%729.729s\n", buf);
+		}
+		else {
+			fsss2::multiSolutionPM ms;
+			pencilmarks allSolutions;
+			int numSol = ms.solve(pm, allSolutions, maxSolutionCount); //this counts solutions and returns -1 on overflow
+			if(numSol == -1) return; // >= maxSolutionCount, skip
+			if(numSol == 0) return; // save your time
+			allSolutions.fromSolver(); //invert
+			char buf[730];
+			pm.toChars729(buf);
+			char buf1[730];
+			allSolutions.toChars729(buf1);
+			printf("%729.729s\t%d\t%729.729s\n", buf, numSol, buf1);
+		}
 		//fflush(NULL);
 	}
 }

@@ -254,6 +254,15 @@ public:
 	int solve(const pencilmarks& forbiddenValuePositions, pencilmarks& res); //tries cell by cell
 };
 
+//count solutions
+class countSolutions final : public nullCollector {
+	int nsol;
+	int solutionsLimit;
+public:
+	bool solutionFound();
+	int solve(const pencilmarks& forbiddenValuePositions, int maxSolutions); //goes trough all solutions when maxSolutions = 0
+};
+
 //get only the positions of givens and find all minimal unique puzzles within the pattern
 class patEnum final : public nullCollector {
 	bm128 unsetCells[81]; //for each guess

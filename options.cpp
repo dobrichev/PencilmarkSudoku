@@ -86,11 +86,15 @@ options::options() {
 	anyopt.setCommandFlag("removeclues");
 	anyopt.addUsage("   --numclues <n>        Remove <n> constraints from the original (1)");
 	//anyopt.setOption("numclues");
+	anyopt.addUsage("   --maxsolutioncount <n> Exports subgrids having up to <n> solutions (defaul 0 = export all)");
+	//anyopt.setOption("maxsolutioncount");
 
 	anyopt.addUsage(" --addclues          Add constraints in all possible ways returning only valid puzzles");
 	anyopt.setCommandFlag("addclues");
 	anyopt.addUsage("   --numclues <n>        Add <n> constraints to the original (1)");
 	//anyopt.setOption("numclues");
+	anyopt.addUsage("   --presolve            Add constraints after finding all subgrid solutions");
+	anyopt.setFlag("presolve");
 
 	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
 	anyopt.setCommandFlag("size");

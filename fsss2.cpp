@@ -1650,6 +1650,18 @@ int multiSolutionPM::solve(const pencilmarks& forbiddenValuePositions, pencilmar
 	return ret;
 }
 
+bool countSolutions::solutionFound() {
+	++nsol;
+	return nsol == solutionsLimit;
+}
+int countSolutions::solve(const pencilmarks& forbiddenValuePositions, int maxSolutions) {
+	fsss2<countSolutions> solver(*this);
+	nsol = 0;
+	solutionsLimit = maxSolutions;
+	solver.solve(forbiddenValuePositions);
+	return nsol == solutionsLimit ? -1 : nsol;
+}
+
 patEnum::patEnum() :
 	solver(fsss2<patEnum>(*this)), nsol(0), size(0), numFixedValues(0), curGuessDepth(0), numPuzzles(0)
 {}
