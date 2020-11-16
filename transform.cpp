@@ -143,13 +143,17 @@ int transform::cmdAddClues() {
 	int numCluesToAdd = opt.getIntValue("numclues", 1);
 	if(numCluesToAdd <= 0) return 1;
 	bool presolve = opt.getFlag("presolve");
+	bool singleNonRedundant = opt.getFlag("singlenonredundant");
 	while(std::cin.getline(line, sizeof(line))) {
 		pencilmarks pm;
 		if(!pm.fromChars729(line)) {
 			ret = 1;
 			continue;
 		}
-		if(presolve) {
+		if(singleNonRedundant) {
+			minimizer::addSingleNonRedundantClue(pm);
+		}
+		else if(presolve) {
 			minimizer::addCluesAnyGridPreSolve(pm, numCluesToAdd);
 		}
 		else {

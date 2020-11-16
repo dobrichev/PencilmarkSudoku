@@ -519,6 +519,23 @@ void minimizer::addCluesAnyGridPreSolve(const pencilmarks& pm, int numCluesToAdd
 	addCluesFromMask(pm, allSolutions, numCluesToAdd, 0); // iterate only unsolved pencilmarks
 }
 
+void minimizer::addSingleNonRedundantClue(const pencilmarks& pm) {
+	fsss2::isRedundant redundancyTester;
+	pencilmarks pm1(pm);
+	for(int digit = 0; digit < 9; digit++) {
+		for(int cell = 0; cell < 81; cell++) {
+			if(pm[digit].isBitSet(cell)) continue; //already forbidden
+			if(redundancyTester.solve(pm, digit, cell)) continue;
+			pm1[digit].setBit(cell);
+			char buf[730];
+			pm1.toChars729(buf);
+			printf("%729.729s\n", buf);
+			fflush(NULL);
+			pm1[digit].clearBit(cell);
+		}
+	}
+}
+
 void minimizer::addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, int start) {
 	if(numCluesToAdd) {
 		fsss2::hasAnySolution as;

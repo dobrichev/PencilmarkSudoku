@@ -95,6 +95,8 @@ options::options() {
 	//anyopt.setOption("numclues");
 	anyopt.addUsage("   --presolve            Add constraints after finding all subgrid solutions");
 	anyopt.setFlag("presolve");
+	anyopt.addUsage("   --singlenonredundant  Add one non-redundant constraint in all possible ways");
+	anyopt.setFlag("singlenonredundant");
 
 	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
 	anyopt.setCommandFlag("size");
