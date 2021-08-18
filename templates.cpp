@@ -9,7 +9,7 @@ bm128 templates::allTemplates[46656];
 templateIndex templates::cellIndexes[81];
 templateIndex templates::cellInverseIndexes[81];
 templateIndex templates::disjointsIndexes[46656];
-templates globalTemplates;
+//templates globalTemplates;
 
 templates::templates() {
 	init();

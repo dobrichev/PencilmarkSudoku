@@ -99,5 +99,6 @@ struct solRowMinLex
 		return false;
 	}
 	static void pmMinLex(const pencilmarks& src, const char* sol, pencilmarks& res);
+	static void rowMinLex(const char *in, char *out);
 };
 #endif // SOLROWMINLEX_H_INCLUDED

@@ -484,16 +484,16 @@ void minimizer::addCluesFromMask(const pencilmarks& pm, const pencilmarks& allSo
 	bool noneChecked = true; //don't miss eventual minimal puzzle with less clues than requested
 	if(numCluesToAdd) {
 		pencilmarks pm1(pm);
-		for(int i = start; i < 729; i++) { //iterate to the end even more clues are expected to be added later - don't skip shorter valid puzzles
-			int digit = i / 81;
-			int cell = i % 81;
-			if(pm1[digit].isBitSet(cell)) continue; //already forbidden
-			if(allSolutions[digit].isBitSet(cell)) continue; // forbidden by mask
-			pm1[digit].setBit(cell);
-			addCluesFromMask(pm1, allSolutions, numCluesToAdd - 1, i + 1);
-			noneChecked = false;
-			pm1[digit].clearBit(cell);
-		}
+			for(int i = start; i < 729; i++) { //iterate to the end even more clues are expected to be added later - don't skip shorter valid puzzles
+				int digit = i / 81;
+				int cell = i % 81;
+				if(pm1[digit].isBitSet(cell)) continue; //already forbidden
+				if(allSolutions[digit].isBitSet(cell)) continue; // forbidden by mask
+				pm1[digit].setBit(cell);
+				addCluesFromMask(pm1, allSolutions, numCluesToAdd - 1, i + 1);
+				noneChecked = false;
+				pm1[digit].clearBit(cell);
+			}
 	}
 	if(noneChecked) {
 		fsss2::hasSingleSolution ss;
@@ -561,6 +561,7 @@ void minimizer::addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, int st
 		}
 	}
 }
+
 
 void minimizer::removeClues(const pencilmarks& pm, int numCluesToRemove, int maxSolutionCount) {
 	pencilmarks blackList;

@@ -578,9 +578,9 @@ void solRowMinLex::pmMinLex(const pencilmarks& src, const char* sol, pencilmarks
 	tr.transform(src, res);
 }
 
-//void rowminlex(const char *in, char *out) {
-//	transformer tr;
-//	tr.byGrid(in);
-//	tr.transform(in, out);
-//}
+void solRowMinLex::rowMinLex(const char *in, char *out) {
+	solRowMinLex tr;
+	tr.byGrid(in);
+	tr.transform(in, out);
+}
 

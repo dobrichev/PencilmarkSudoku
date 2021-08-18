@@ -2,6 +2,7 @@
 #define PENCILMARKS_H_
 
 #include "t_128.h"
+#include <iostream>
 
 /*
  * Structure for storing and manipulating array of 9 128-bit fields.
@@ -27,6 +28,12 @@ struct pencilmarks {
 		}
 		return *this;
 	}
+	pencilmarks& operator &=(const pencilmarks& other) {
+		for(int d = 0; d < 9; d++) {
+			pm[d] &= other[d];
+		}
+		return *this;
+	}
 	int popcount() const {
 		int ret = 0;
 		for(int d = 0; d < 9; d++) {
@@ -34,15 +41,21 @@ struct pencilmarks {
 		}
 		return ret;
 	}
-//	bool isSubsetOf(const pencilmarks& other) const {
-//		for(int d = 0; d < 9; d++) {
-//			if(!pm[d].isSubsetOf(other[d])) return false;
-//		}
-//		return true;
-//	}
+	bool isSubsetOf(const pencilmarks& other) const {
+		for(int d = 0; d < 9; d++) {
+			if(!pm[d].isSubsetOf(other[d])) return false;
+		}
+		return true;
+	}
 	bool isDisjoint(const pencilmarks& other) const {
 		for(int d = 0; d < 9; d++) {
 			if(!pm[d].isDisjoint(other[d])) return false;
+		}
+		return true;
+	}
+	bool isZero() const {
+		for(int d = 0; d < 9; d++) {
+			if(!pm[d].isZero()) return false;
 		}
 		return true;
 	}
@@ -52,11 +65,27 @@ struct pencilmarks {
 	bm128& operator[](int digit) {
 		return pm[digit];
 	}
-	void forceCell(int cell, int digit) { //forbid all digits except one
+	bool operator <(const pencilmarks& other) const {
 		for(int d = 0; d < 9; d++) {
-			if(d == digit) continue;
-			pm[d].setBit(cell);
+			//if(pm[d] < other[d]) return true;
+			//if(!(pm[d] == other[d])) return false;
+			int diff = pm[d].lge(other[d]);
+			if(diff) return diff < 0;
 		}
+		return false;
+	}
+	bool operator ==(const pencilmarks& other) const {
+		for(int d = 0; d < 9; d++) {
+			if(!(pm[d] == other[d])) return false;
+		}
+		return true;
+	}
+	void forceCell(int cell, int digit) { //forbid all digits except one
+//		for(int d = 0; d < 9; d++) {
+//			if(d == digit) continue;
+//			pm[digit].setBit(cell);
+//		}
+		pm[digit].setBit(cell);
 	}
 	pencilmarks& allowSolution(char* sol) {
 		for(int c = 0; c < 81; c++) {
@@ -83,10 +112,19 @@ struct pencilmarks {
     	clear(); //all allowed
     	const char* s = src;
 		for(int c = 0; c < 81; c++) {
-			if(*s >= '1' && *s <= '9') forceCell(c, (*s) - '1');
+			//if(*s >= '1' && *s <= '9') forceCell(c, (*s) - '1');
+			if(*s >= '1' && *s <= '9') {
+				pm[(*s) - '1'].setBit(c);
+			}
+			else {
+				for(int d = 0; d < 9; d++) {
+					pm[d].setBit(c);
+				}
+			}
 			s++;
 		}
-    	return true;
+		fromSolver();
+     	return true;
     }
     bool fromChars729(const char *src) {
     	clear();
@@ -108,6 +146,31 @@ struct pencilmarks {
 				res++;
 			}
 		}
+    }
+    friend std::ostream & operator <<(std::ostream& out, const pencilmarks& e) {
+    	if(0) {
+    		;
+    	}
+    	else {
+        	char buf[730];
+        	e.toChars729(buf);
+        	out.write(buf, 729);
+    	}
+    	return out;
+    }
+    friend std::istream & operator >>(std::istream& in, pencilmarks& e) {
+    	char buf[730];
+    	//in >> std::setw(729) >> buf;
+    	in.read(buf, 729);
+    	if(in.good() && in.gcount() == 729) {
+    		if(!e.fromChars729(buf)) {
+    			in.setstate(std::ios_base::badbit);
+    		}
+    	}
+    	else {
+    		e.clear();
+    	}
+    	return in;
     }
 };
 #endif // PENCILMARKS_H_

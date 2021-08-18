@@ -73,7 +73,10 @@ struct bm128 {
 	inline bool isDisjoint(const bm128& r) const {return 0 != _mm_testz_si128(r.bitmap128.m128i_m128i, bitmap128.m128i_m128i);}
 	inline int mask8() const {return _mm_movemask_epi8(bitmap128.m128i_m128i);}
 	inline uint64_t toInt64() const {return _mm_cvtsi128_si64(bitmap128.m128i_m128i);}
+	//inline uint64_t toInt64() const {return _mm_extract_epi64(bitmap128.m128i_m128i, 0);}
 	inline uint64_t toInt64_1() const {return _mm_extract_epi64(bitmap128.m128i_m128i, 1);}
+	inline bool operator <(const bm128& r) const {if(toInt64() < r.toInt64()) return true; if(toInt64() > r.toInt64()) return false; return toInt64_1() < r.toInt64_1();}
+	inline int lge(const bm128& r) const {int d = toInt64() < r.toInt64() ? -1 : (toInt64() == r.toInt64() ? 0 : 1); return d ? d : toInt64_1() < r.toInt64_1() ? -1 : (toInt64_1() == r.toInt64_1() ? 0 : 1);} // <=> operator
 	//inline int toInt32() const {return _mm_cvtsi128_si32(bitmap128.m128i_m128i);}
 	inline uint32_t toInt32_2() const {return _mm_extract_epi32(bitmap128.m128i_m128i, 2);}
 	inline uint32_t toInt32_3() const {return _mm_extract_epi32(bitmap128.m128i_m128i, 3);}

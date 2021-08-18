@@ -101,6 +101,13 @@ options::options() {
 	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
 	anyopt.setCommandFlag("size");
 
+	anyopt.addUsage(" --lowsolexpand      Try finding valid puzzles by replacing clues that when removed alone lead to limited number of solutions");
+	anyopt.setCommandFlag("lowsolexpand");
+	anyopt.addUsage("   --numsolutions <n>    Examines puzzles with exactly <n> solutions");
+	anyopt.setOption("numsolutions");
+	anyopt.addUsage("   --numclues <n>        Removes <n> constraints from the original, adds <= <n> (1)");
+	//anyopt.setOption("numclues");
+
 	anyopt.addUsage("");
 
 	//by default all  options  will be checked on the command line and from option/resource file
@@ -190,6 +197,9 @@ int options::execCommand() {
 	}
 	if(anyopt.getFlag("size")) {
 		return transform::cmdSize();
+	}
+	if(anyopt.getFlag("lowsolexpand")) {
+		return lowSolutionsCount::cmdLowSolAnalyze();
 	}
 	cerr << "Error: No command specified." << endl;
 	return -1;

@@ -1587,6 +1587,44 @@ int getTwoSolutions::solve(const pencilmarks& forbiddenValuePositions, char* res
 	solver.solve(forbiddenValuePositions);
 	return nsol;
 }
+int getTwoSolutions::solve(const pencilmarks& forbiddenValuePositions, pencilmarks& firstUnhitDeadlyPattern) {
+	fsss2<getTwoSolutions> solver(*this);
+	nsol = 0;
+	char solBuffer[2*81];
+	resChar = solBuffer;
+	solver.solve(forbiddenValuePositions);
+	if(nsol != 2) return nsol;
+	firstUnhitDeadlyPattern.clear();
+	for(int c = 0; c < 81; c++) {
+		if(solBuffer[c] != solBuffer[c + 81]) {
+			firstUnhitDeadlyPattern[solBuffer[c] - 1].setBit(c);
+			firstUnhitDeadlyPattern[solBuffer[c + 81] - 1].setBit(c);
+		}
+	}
+	return nsol;
+}
+
+void getNSolutions::setCellValue(int cell, int val) {
+	resChar[cell] = (char)val;
+}
+bool getNSolutions::solutionFound() {
+	pencilmarks& pm = resPM_[nsol];
+	pm.clear();
+	for(int i = 0; i < 81; i++) {
+		pm[resChar[i] - 1].setBit(i);
+	}
+	nsol++;
+	return nsol >= max_solutions_; //stop after exhausting solution limit
+}
+int getNSolutions::solve(const pencilmarks& forbiddenValuePositions, pencilmarks* resPM, int max_solutions) {
+	fsss2<getNSolutions> solver(*this);
+	nsol = 0;
+	max_solutions_ = max_solutions;
+	resPM_ = resPM;
+	resChar = sol;
+	solver.solve(forbiddenValuePositions);
+	return nsol >= max_solutions_ ? -1 : nsol;
+}
 
 bool getAnySolution::solutionFound() {
 	return (++nsol == 1); //stop after first solution

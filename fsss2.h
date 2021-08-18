@@ -18,7 +18,7 @@
 //#define COUNT_TRIALS
 
 //for low-clue pencilmark-only sudoku
-//#define GUESS_STRATEGY_2
+#define GUESS_STRATEGY_2
 
 #define USE_LOCKED_CANDIDATES
 #define LOCKED_CANDIDATES_ALWAYS
@@ -230,6 +230,18 @@ public:
 	bool solutionFound();
 	int solve(const char* p, char* res);
 	int solve(const pencilmarks& forbiddenValuePositions, char* res);
+	int solve(const pencilmarks& forbiddenValuePositions, pencilmarks& firstUnhitDeadlyPattern);
+};
+
+//gets first N solutions
+class getNSolutions final : public getSingleSolution {
+	char sol[81];
+	int max_solutions_;
+	pencilmarks* resPM_;
+public:
+	inline void setCellValue(int cell, int val);
+	bool solutionFound();
+	int solve(const pencilmarks& forbiddenValuePositions, pencilmarks* resPM, int max_solutions);
 };
 
 //test whether a given puzzle has at least one solution and returns it

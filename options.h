@@ -14,6 +14,7 @@
 #include "cmdSolve.h"
 #include "cmdBackdoor.h"
 #include "transform.h"
+#include "lowSolutionsCount.h"
 
 class options {
 	AnyOption anyopt;
