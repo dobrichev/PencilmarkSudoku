@@ -527,7 +527,8 @@ void solRowMinLex::transform(const pencilmarks& in, pencilmarks& out) const {
 		pencilmarks aout;
 		next->transform(in, aout); //minimal of the rest of the transformations
 		if(memcmp(&out, &aout, sizeof(pencilmarks)) > 0) {
-			memcpy(&out, &aout, sizeof(pencilmarks));
+			//memcpy(&out, &aout, sizeof(pencilmarks));
+			out = aout;
 		}
 	}
 }

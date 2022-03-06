@@ -88,6 +88,10 @@ options::options() {
 	//anyopt.setOption("numclues");
 	anyopt.addUsage("   --maxsolutioncount <n> Exports subgrids having up to <n> solutions (defaul 0 = export all)");
 	//anyopt.setOption("maxsolutioncount");
+	anyopt.setOption("removemask");
+	anyopt.addUsage("   --removemask      Remove only clues from this mask");
+	anyopt.setOption("keepmask");
+	anyopt.addUsage("   --keepmask        Don't remove clues from this mask");
 
 	anyopt.addUsage(" --addclues          Add constraints in all possible ways returning only valid puzzles");
 	anyopt.setCommandFlag("addclues");
@@ -97,6 +101,8 @@ options::options() {
 	anyopt.setFlag("presolve");
 	anyopt.addUsage("   --singlenonredundant  Add one non-redundant constraint in all possible ways");
 	anyopt.setFlag("singlenonredundant");
+	anyopt.addUsage("   --fast                Fast but not exhaustive");
+	anyopt.setFlag("fast");
 
 	anyopt.addUsage(" --size              Output column with number of constraints (givens)");
 	anyopt.setCommandFlag("size");
@@ -107,6 +113,12 @@ options::options() {
 	anyopt.setOption("numsolutions");
 	anyopt.addUsage("   --numclues <n>        Removes <n> constraints from the original, adds <= <n> (1)");
 	//anyopt.setOption("numclues");
+
+	anyopt.addUsage(" --twins             Compose twins, puzzles which pencilmarks diference is entirely covered by a UA set");
+	anyopt.setCommandFlag("twins");
+
+	anyopt.addUsage(" --clusterize        Split given puzzles into clusters of {-1,+1}, {-2,+2}, etc. No morphs are examined.");
+	anyopt.setCommandFlag("clusterize");
 
 	anyopt.addUsage("");
 
@@ -198,8 +210,14 @@ int options::execCommand() {
 	if(anyopt.getFlag("size")) {
 		return transform::cmdSize();
 	}
+	if(anyopt.getFlag("twins")) {
+		return transform::cmdTwins();
+	}
 	if(anyopt.getFlag("lowsolexpand")) {
 		return lowSolutionsCount::cmdLowSolAnalyze();
+	}
+	if(anyopt.getFlag("clusterize")) {
+		return transform::cmdClusterize();
 	}
 	cerr << "Error: No command specified." << endl;
 	return -1;

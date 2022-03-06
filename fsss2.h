@@ -24,38 +24,9 @@
 #define LOCKED_CANDIDATES_ALWAYS
 #define LOCKED_CANDIDATES_USE_CACHE
 
-//#define USE_SUBSETS
+#define USE_SUBSETS
 
-#ifdef USE_LOCKED_CANDIDATES
-struct tripletMask {
-	t_128 self;
-	t_128 adjacentLine;
-	t_128 adjacentBox;
-};
-#endif
-
-struct constraints {
-	//1 for first 81 bits
-	static const t_128 mask81;
-
-	//1 for first 81 bits (cells) and 27 bits from position 96+ (houses)
-	static const t_128 mask108;
-
-	//1 for 27 bits at position 96 (houses)
-	//static const t_128 mask27;
-
-	//1 for bits to clear when solving particular cell, including the 20 visible cells, self, and the 3 houses at bits 96+
-	static const t_128 visibleCells[81];
-
-	//1 for bits in the respective house (9 rows, 9 columns, 9 boxes)
-	static const t_128 bitsForHouse[27];
-
-#ifdef USE_LOCKED_CANDIDATES
-	static const tripletMask tripletMasks[54];
-#endif
-
-	//static const uint32_t topCellsHouses; //1 for the houses having cells only within top 64 ones
-};
+//#define USE_FISHES
 
 namespace fsss2 {
 
@@ -95,6 +66,10 @@ public:
 
 	uint32_t guessDepth;
 
+	int numTrialsLocal;
+	//uint32_t maxGuessDepth;
+	//int hardMode;
+
 #ifdef USE_LOCKED_CANDIDATES
 #ifndef LOCKED_CANDIDATES_ALWAYS
 	int lockedDone;
@@ -102,8 +77,11 @@ public:
 #endif
 
 #ifdef USE_SUBSETS
-	int subsetsDone;
-	bm128 knownNoSubsets[36];
+	//int subsetsDone;
+	bm128 knownNoPairs[36];
+	bm128 knownNoTriples[84];
+	bm128 knownNoQuadruples[126];
+	//bm128 knownNoQuintuples[126]; // almost never helps
 #endif
 
 	X &collector; //the object instance that receives notifications for solved cells and solutions found
@@ -117,6 +95,20 @@ public:
 #ifdef USE_LOCKED_CANDIDATES
 	//performs line-box eliminations for the specified digit
 	static bool doLockedCandidatesForDigit(bm128& tmp);
+#endif
+
+#ifdef USE_LOCKED_CANDIDATES
+	int doPairs();
+	int doTriples();
+	int doQuadruples();
+	int doQuintuples();
+	int doSextuples();
+	int doSeptuples();
+#endif
+
+#ifdef USE_FISHES
+	int doFish2();
+	int doFish3();
 #endif
 
 	//does the direct eliminations, then does T&E
@@ -187,6 +179,7 @@ public:
 	bool solutionFound();
 	bool solve(const char* p, int testPosition);
 	bool solve(const pencilmarks& forbiddenValuePositions, int testValue, int testPosition);
+	bool isAllowedRedundant(const pencilmarks& forbiddenValuePositions, int testValue, int testPosition);
 	//void setCellValue(int cell, int val); //debug
 };
 

@@ -3,6 +3,36 @@
 
 #include "t_128.h"
 #include <iostream>
+#include <string>
+
+struct tripletMask {
+	t_128 self;
+	t_128 adjacentLine;
+	t_128 adjacentBox;
+};
+
+struct constraints {
+	//1 for first 81 bits
+	static const t_128 mask81;
+
+	//1 for first 81 bits (cells) and 27 bits from position 96+ (houses)
+	static const t_128 mask108;
+
+	//1 for 27 bits at position 96 (houses)
+	//static const t_128 mask27;
+
+	//1 for bits to clear when solving particular cell, including the 20 visible cells, self, and the 3 houses at bits 96+
+	static const t_128 visibleCells[81];
+
+	//1 for bits in the respective house (9 rows, 9 columns, 9 boxes)
+	static const t_128 bitsForHouse[27];
+
+//#ifdef USE_LOCKED_CANDIDATES
+	static const tripletMask tripletMasks[54];
+//#endif
+
+	//static const uint32_t topCellsHouses; //1 for the houses having cells only within top 64 ones
+};
 
 /*
  * Structure for storing and manipulating array of 9 128-bit fields.
@@ -12,6 +42,7 @@
  */
 struct pencilmarks {
 	bm128 pm[9];
+	static const pencilmarks xMask81;
 	void clear() {
 		for(int d = 0; d < 9; d++) {
 			pm[d].clear();
@@ -31,6 +62,12 @@ struct pencilmarks {
 	pencilmarks& operator &=(const pencilmarks& other) {
 		for(int d = 0; d < 9; d++) {
 			pm[d] &= other[d];
+		}
+		return *this;
+	}
+	pencilmarks& operator ^=(const pencilmarks& other) {
+		for(int d = 0; d < 9; d++) {
+			pm[d] ^= other[d];
 		}
 		return *this;
 	}
@@ -95,19 +132,31 @@ struct pencilmarks {
 	}
 	pencilmarks& fromSolver(const bm128* solverPM) {
 		for(int d = 0; d < 9; d++) {
-			pm[d] = t_128({0xFFFFFFFFFFFFFFFF,    0x0001FFFF});
+			pm[d] = t_128(constraints::mask81);
 			pm[d].clearBits(solverPM[d]); //allow all active pencilmarks
 		}
 		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
 	}
 	pencilmarks& fromSolver() {
 		for(int d = 0; d < 9; d++) {
-			bm128 tmp = t_128({0xFFFFFFFFFFFFFFFF,    0x0001FFFF});
+			bm128 tmp = t_128(constraints::mask81);
 			tmp.clearBits(pm[d]);
 			pm[d] = tmp; //allow all active pencilmarks
 		}
 		return *this; //solution pencilmarks must be allowed at some point, see allowSolution(char* sol)
 	}
+    void fromList(const char *src) {
+    	clear();
+    	std::string s(src);
+    	std::size_t pos{};
+    	while(!s.empty()) {
+    		const int i {std::stoi(s, &pos)};
+    		if(!pos) break;
+    		s = s.substr(pos);
+    		if(i < 0 || i > 728) continue;
+    		pm[i % 9].setBit(i / 9);
+    	}
+    }
     bool fromChars81(const char *src) {
     	clear(); //all allowed
     	const char* s = src;
@@ -173,4 +222,5 @@ struct pencilmarks {
     	return in;
     }
 };
+
 #endif // PENCILMARKS_H_

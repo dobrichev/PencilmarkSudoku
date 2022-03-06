@@ -100,6 +100,9 @@ struct bm128 {
 //		j = _mm_cvtsi128_si64(xmm);
 		return (int)(_popcnt64(this->toInt64()) + _popcnt64(this->toInt64_1()));
 	}
+	inline int popcount_96() const {
+		return (int)(_popcnt64(this->toInt64()) + _popcnt32(this->toInt32_2()));
+	}
     //inline unsigned int nonzeroOctets() const {return 0x0000ffff ^ _mm_movemask_epi8(_mm_cmpeq_epi8(bitmap128.m128i_m128i, _mm_setzero_si128()));}
     //inline unsigned int diffOctets(const bm128 &rhs) const {return 0x0000ffff ^ _mm_movemask_epi8(_mm_cmpeq_epi8(bitmap128.m128i_m128i, rhs.bitmap128.m128i_m128i));}
 	inline int getFirstBit1Index96() const {

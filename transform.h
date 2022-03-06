@@ -14,5 +14,7 @@ struct transform {
 	static int cmdRemoveClues();
 	static int cmdAddClues();
 	static int cmdSize();
+	static int cmdTwins();
+	static int cmdClusterize();
 };
 #endif //TRANSFORM_H_

@@ -209,6 +209,8 @@ struct minimizer {
 	static void removeClues(const pencilmarks& pm, int numCluesToRemove, int maxSolutionCount);
 	static void removeClues(const pencilmarks& pm, int numCluesToRemove, int start, int maxSolutionCount, const pencilmarks& blackList);
 	static void addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, int start = 0);
+	static void addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, const pencilmarks& deadClues);
+	static void addCluesAnyGridFast(const pencilmarks& pm, int numCluesToAdd, const pencilmarks& deadClues);
 	static void addCluesAnyGridPreSolve(const pencilmarks& pm, int numCluesToAdd);
 	static void addCluesFromMask(const pencilmarks& pm, const pencilmarks& allSolutions, int numCluesToAdd, int start);
 	static void addSingleNonRedundantClue(const pencilmarks& pm);

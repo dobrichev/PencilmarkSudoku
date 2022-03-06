@@ -192,7 +192,8 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 
 	do { //while the previous pass returns puzzles do a next pass
 		//produce puzzles a) with one less given than in previous pass; b) having unique solution; c) not necessarily minimal
-		fprintf(stderr, "Pass %d, minimizing %d constraints. Parent list is of size\t%d\n", numPasses++, numConstraints--, (int)previousPass.size());
+		//fprintf(stderr, "Pass %d, minimizing %d constraints. Parent list is of size\t%d\n", numPasses, numConstraints, (int)previousPass.size());
+		numPasses++, numConstraints--;
 		for(int currDigit = 8; currDigit >= 0; currDigit--) { //iterate digits
 			for(int currCell = 80; currCell >=0; currCell--) { //iterate cells in reverse order
 				if(!original.isForRemoval(currDigit, currCell))
@@ -205,6 +206,7 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 						//check whether the currGiven is redundant in this context
 						{
 							if(redundancyTester.solve(current.forbiddenValuePositions, currDigit, currCell)) {
+							//if(redundancyTester.isAllowedRedundant(current.forbiddenValuePositions, currDigit, currCell)) {
 								//the currGiven is redundant in the context of the parent
 								current.getFixedFrom(parent);
 								current.markAsFixed(currDigit, currCell);
@@ -252,7 +254,8 @@ void minimizer::minimizePencilmarks(const complementaryPencilmarksX& original, c
 		fflush(NULL);
 	} while(!previousPass.empty() && numConstraints >= minSize);
 	exit:
-	fprintf(stderr, "\nMinimals found = %d\n", numMinimals);
+	fprintf(stderr, "%c", numMinimals ? '+' : '.');
+	//fprintf(stderr, "Minimals found = %d\n", numMinimals);
 }
 //void minimizer::minimizePencilmarks(pencilmarks& forbiddenValuePositions, int bufferSize) {
 //	char sol[88];
@@ -521,16 +524,20 @@ void minimizer::addCluesAnyGridPreSolve(const pencilmarks& pm, int numCluesToAdd
 
 void minimizer::addSingleNonRedundantClue(const pencilmarks& pm) {
 	fsss2::isRedundant redundancyTester;
+	//fsss2::hasAnySolution as;
 	pencilmarks pm1(pm);
 	for(int digit = 0; digit < 9; digit++) {
 		for(int cell = 0; cell < 81; cell++) {
 			if(pm[digit].isBitSet(cell)) continue; //already forbidden
 			if(redundancyTester.solve(pm, digit, cell)) continue;
+			if(redundancyTester.isAllowedRedundant(pm, digit, cell)) continue;
 			pm1[digit].setBit(cell);
-			char buf[730];
-			pm1.toChars729(buf);
-			printf("%729.729s\n", buf);
-			fflush(NULL);
+//			if(1 == as.solve(pm1)) { // ensure that at least one solution exists (else a cell with single possibility results in false positive)
+				char buf[730];
+				pm1.toChars729(buf);
+				printf("%729.729s\n", buf);
+				fflush(NULL);
+//			}
 			pm1[digit].clearBit(cell);
 		}
 	}
@@ -562,6 +569,112 @@ void minimizer::addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, int st
 	}
 }
 
+void minimizer::addCluesAnyGrid(const pencilmarks& pm, int numCluesToAdd, const pencilmarks& deadClues) {
+	//static const pencilmarks xMask81 = {constraints::mask81, constraints::mask81, constraints::mask81, constraints::mask81, constraints::mask81, constraints::mask81, constraints::mask81, constraints::mask81, constraints::mask81};
+	bool found = false;
+	pencilmarks pm1(pm);
+	if(numCluesToAdd) {
+		fsss2::countSolutions cs;
+		pencilmarks firstUnhitDeadlyPattern;
+		switch(cs.solve(pm1, 2)) {
+			case 0: return; // no solution
+			case 1: // single solution
+			{
+				// a single-solution puzzle found after less than numCluesToAdd have been added
+				found = true;
+			}
+			break;
+			default: // 2+ solutions (actually cs.solve(pm1, 2) returns -1)
+			{
+				firstUnhitDeadlyPattern = pencilmarks::xMask81;
+
+				pencilmarks skipMe(pm1);
+				skipMe |= deadClues;
+				firstUnhitDeadlyPattern.clearBits(skipMe); // don't attempt to set either already givens nor dead clues
+				pencilmarks cluesToTest(firstUnhitDeadlyPattern);
+				cluesToTest.clearBits(skipMe);
+				//{
+				//	printf("%d\t%d\t%d\n", numCluesToAdd, cluesToTest.popcount(), simpleUA.popcount_128());
+				//}
+				for(int d = 0; d < 9; d++) {
+					if(cluesToTest[d].isZero()) continue;
+					for(int c = 0; c < 81; c++) {
+						if(!cluesToTest[d].isBitSet(c)) continue; //already forbidden
+						pm1[d].setBit(c);
+						skipMe[d].setBit(c);
+						addCluesAnyGrid(pm1, numCluesToAdd - 1, skipMe);
+						pm1[d].clearBit(c);
+					}
+				}
+			}
+		}
+	}
+	else {
+		fsss2::hasSingleSolution ss;
+		found = (1 == ss.solve(pm1));
+	}
+
+	if(found) {
+		char buf[730];
+		pm1.toChars729(buf);
+		printf("%729.729s\t%d\n", buf, pm1.popcount());
+		fflush(NULL);
+	}
+}
+
+void minimizer::addCluesAnyGridFast(const pencilmarks& pm, int numCluesToAdd, const pencilmarks& deadClues) {
+	bool found = false;
+	pencilmarks pm1(pm);
+	if(numCluesToAdd) {
+		fsss2::getTwoSolutions ts;
+		pencilmarks firstUnhitDeadlyPattern;
+		switch(ts.solve(pm1, firstUnhitDeadlyPattern)) {
+			case 0: return; // no solution
+			case 1: // single solution
+			{
+				// a single-solution puzzle found after less than numCluesToAdd have been added
+				found = true;
+			}
+			break;
+			default: // 2+ solutions
+			{
+					//bm128 simpleUA(firstUnhitDeadlyPattern[0]);
+					//for(int d = 1; d < 9; d++) {
+					//	simpleUA |= firstUnhitDeadlyPattern[d];
+					//}
+				pencilmarks skipMe(pm1);
+				skipMe |= deadClues;
+				firstUnhitDeadlyPattern.clearBits(skipMe); // don't attempt to set either already givens nor dead clues
+				pencilmarks cluesToTest(firstUnhitDeadlyPattern);
+				cluesToTest.clearBits(skipMe);
+				//{
+				//	printf("%d\t%d\t%d\n", numCluesToAdd, cluesToTest.popcount(), simpleUA.popcount_128());
+				//}
+				for(int d = 0; d < 9; d++) {
+					if(cluesToTest[d].isZero()) continue;
+					for(int c = 0; c < 81; c++) {
+						if(!cluesToTest[d].isBitSet(c)) continue; //already forbidden
+						pm1[d].setBit(c);
+						skipMe[d].setBit(c);
+						addCluesAnyGrid(pm1, numCluesToAdd - 1, skipMe);
+						pm1[d].clearBit(c);
+					}
+				}
+			}
+		}
+	}
+	else {
+		fsss2::hasSingleSolution ss;
+		found = (1 == ss.solve(pm1));
+	}
+
+	if(found) {
+		char buf[730];
+		pm1.toChars729(buf);
+		printf("%729.729s\t%d\n", buf, pm1.popcount());
+		fflush(NULL);
+	}
+}
 
 void minimizer::removeClues(const pencilmarks& pm, int numCluesToRemove, int maxSolutionCount) {
 	pencilmarks blackList;
@@ -576,7 +689,7 @@ void minimizer::removeClues(const pencilmarks& pm, int numCluesToRemove, int max
 			if(!pm1[digit].isBitSet(cell)) continue; //already removed
 			pm1[digit].clearBit(cell);
 			pencilmarks allSolutions;
-			int numSol = cs.solve(pm1, maxSolutionCount); //this counts solutions and returns -1 on overflow
+			int numSol = cs.solve(pm1, maxSolutionCount + 1); //this counts solutions and returns -1 on overflow
 			if(numSol <= 0) {
 				blackList[digit].setBit(cell);
 			}
@@ -592,11 +705,12 @@ void minimizer::removeClues(const pencilmarks& pm, int numCluesToRemove, int sta
 			int digit = i / 81;
 			int cell = i % 81;
 			if(!pm1[digit].isBitSet(cell)) continue; //already removed
+			if(blackList[digit].isBitSet(cell)) continue; //blacklisted
 			pm1[digit].clearBit(cell);
 			if(maxSolutionCount == 0) {
 				removeClues(pm1, numCluesToRemove - 1, i + 1, maxSolutionCount, blackList);
 			}
-			else if(!blackList[digit].isBitSet(cell)) {
+			else {
 				if(numCluesToRemove > 1) {
 					fsss2::countSolutions cs;
 					int numSol = cs.solve(pm1, maxSolutionCount); //this counts solutions and returns -1 on overflow
@@ -1300,7 +1414,7 @@ void minimizer::reduceM2P1v4(pencilmarks& forbiddenValuePositions) { // ~1.5 sec
 					if(maxTrialsSoFar < nTrials) {
 						maxTrialsSoFar = nTrials;
 					}
-					fprintf(stderr, "\n%d\t{-(%d,%d),(%d,%d),+(%d,%d)}\t%d", nTrials, redundantsAlone[dForbid][cForbid].rc[allow1].digit, redundantsAlone[dForbid][cForbid].rc[allow1].cell, redundantsAlone[dForbid][cForbid].rc[allow2].digit, redundantsAlone[dForbid][cForbid].rc[allow2].cell, dForbid, cForbid, numSolutions);
+					//fprintf(stderr, "\n%d\t{-(%d,%d),(%d,%d),+(%d,%d)}\t%d", nTrials, redundantsAlone[dForbid][cForbid].rc[allow1].digit, redundantsAlone[dForbid][cForbid].rc[allow1].cell, redundantsAlone[dForbid][cForbid].rc[allow2].digit, redundantsAlone[dForbid][cForbid].rc[allow2].cell, dForbid, cForbid, numSolutions);
 #endif
 					if(1 == numSolutions) {
 						//lucky
