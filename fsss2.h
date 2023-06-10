@@ -235,6 +235,7 @@ public:
 	inline void setCellValue(int cell, int val);
 	bool solutionFound();
 	int solve(const pencilmarks& forbiddenValuePositions, pencilmarks* resPM, int max_solutions);
+	int getShortDP(const pencilmarks& forbiddenValuePositions, pencilmarks& resPM, int max_solutions);
 };
 
 //test whether a given puzzle has at least one solution and returns it

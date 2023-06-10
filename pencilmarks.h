@@ -117,12 +117,26 @@ struct pencilmarks {
 		}
 		return true;
 	}
+	int getNumDifferences(const pencilmarks& other, int maxDiff) const {
+		int diff = 0;
+		for(int d = 0; d < 9; d++) {
+			//diff += _popcnt64(pm[d].toInt64() ^ other[d].toInt64());
+			diff += _popcnt64(pm[d].bitmap128.m128i_u64[0] ^ other[d].bitmap128.m128i_u64[0]);
+			//diff += _popcnt64(pm[d].toInt64() ^ other[d].bitmap128.m128i_u64[0]);
+			if(diff > maxDiff) return -1;
+			//diff += _popcnt64(pm[d].toInt64_1() ^ other[d].toInt64_1());
+			diff += _popcnt64(pm[d].bitmap128.m128i_u64[1] ^ other[d].bitmap128.m128i_u64[1]);
+			//diff += _popcnt64(pm[d].toInt64_1() ^ other[d].bitmap128.m128i_u64[1]);
+			if(diff > maxDiff) return -1;
+		}
+		return diff;
+	}
 	void forceCell(int cell, int digit) { //forbid all digits except one
-//		for(int d = 0; d < 9; d++) {
-//			if(d == digit) continue;
-//			pm[digit].setBit(cell);
-//		}
-		pm[digit].setBit(cell);
+		for(int d = 0; d < 9; d++) {
+			if(d == digit) continue;
+			pm[d].setBit(cell);
+		}
+		//pm[digit].setBit(cell);
 	}
 	pencilmarks& allowSolution(char* sol) {
 		for(int c = 0; c < 81; c++) {
@@ -148,7 +162,7 @@ struct pencilmarks {
     void fromList(const char *src) {
     	clear();
     	std::string s(src);
-    	std::size_t pos{};
+    	std::size_t pos;
     	while(!s.empty()) {
     		const int i {std::stoi(s, &pos)};
     		if(!pos) break;

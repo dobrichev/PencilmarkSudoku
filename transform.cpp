@@ -6,6 +6,7 @@
 #include "options.h"
 #include "fsss2.h"
 #include "minimizer.h"
+#include "patminlexPM.h"
 
 int transform::cmdSolRowMinLex() {
 	int ret = 0;
@@ -31,6 +32,23 @@ int transform::cmdSolRowMinLex() {
 			continue; //silently ignore invalid puzzles
 		}
 		solRowMinLex::pmMinLex(pm, sol, res);
+		res.toChars729(outPuz);
+		printf("%729.729s\n", outPuz);
+	}
+	return ret;
+}
+int transform::cmdPatMinLex() {
+	int ret = 0;
+	char line[2000];
+	char outPuz[729];
+	while(std::cin.getline(line, sizeof(line))) {
+		pencilmarks pm;
+		if(!pm.fromChars729(line)) {
+			ret = 1;
+			continue;
+		}
+		pencilmarks res;
+		patminlexPM x(pm, res);
 		res.toChars729(outPuz);
 		printf("%729.729s\n", outPuz);
 	}
@@ -153,7 +171,7 @@ int transform::cmdRemoveClues() {
 			ret = 1;
 			continue;
 		}
-		minimizer::removeClues(pm, numCluesToRemove, maxSolutionCount, 0, blacklist);
+		minimizer::removeClues(pm, numCluesToRemove, 0, maxSolutionCount, blacklist);
 		fflush(NULL);
 	}
 	return ret;
@@ -176,13 +194,23 @@ int transform::cmdAddClues() {
 			minimizer::addSingleNonRedundantClue(pm);
 		}
 		else if(fast) {
-			minimizer::addCluesAnyGridFast(pm, numCluesToAdd, pencilmarks{});
+			pencilmarks allSolutions;
+			fsss2::multiSolutionPM ms;
+			int numRedundant = ms.solve(pm, allSolutions); //this sets allSolutions to the union of all solutions and returns the number of redundant constraints
+			//printf("%d\n", numRedundant);
+			minimizer::addCluesAnyGridFast(pm, numCluesToAdd, allSolutions); // force cell values that aren't part of any of the solutions as dead clues
+			//minimizer::addCluesAnyGridFast(pm, numCluesToAdd, pencilmarks{});
 		}
 		else if(presolve) {
 			minimizer::addCluesAnyGridPreSolve(pm, numCluesToAdd);
 		}
 		else {
-			minimizer::addCluesAnyGrid(pm, numCluesToAdd, pencilmarks{});
+			pencilmarks allSolutions;
+			fsss2::multiSolutionPM ms;
+			int numRedundant = ms.solve(pm, allSolutions); //this sets allSolutions to the union of all solutions and returns the number of redundant constraints
+			//printf("%d\n", numRedundant);
+			minimizer::addCluesAnyGrid(pm, numCluesToAdd, allSolutions); // force cell values that aren't part of any of the solutions as dead clues
+			//minimizer::addCluesAnyGrid(pm, numCluesToAdd, pencilmarks{});
 		}
 		//fflush(NULL);
 	}
@@ -374,17 +402,33 @@ int transform::cmdClusterize() {
 //		cl4n[first] = first;
 	}
 	//sleep(20);
+	clock_t start, finish;
+	start = clock();
 	for(uint32_t first = 0; first < numItems; first++) {
 		const pencilmarks& p1(allPM[first]);
+		if(first % 100 == 0) {
+			//fprintf(stderr, ".");
+			finish = clock();
+			fprintf(stderr, "%2.0f ", (double)(finish - start) / CLOCKS_PER_SEC);
+			start = finish;
+		}
+		if(first % 10000 == 0) {
+			fprintf(stderr, "%d/%d\n", first, numItems);
+		}
 		for(uint32_t second = first + 1; second < numItems; second++) {
+			//__builtin_prefetch((void*)&cl1[second + 12].label); // none=16, +10=15, +16=16, +8=16, +12=16
+			__builtin_prefetch((void*)&allPM[second + 12]); // none=21, +5=16, +15=17, +10=16, +8=16, +12=16
 			if(cl1[first].label == cl1[second].label) continue; // already in same partition
-			pencilmarks p(allPM[second]);
-			p ^= p1;
-			int diff(p.popcount() / 2);
+			const pencilmarks& p(allPM[second]);
+			//p ^= p1;
+			//int diff(p.popcount() / 2);
+			int diff(p1.getNumDifferences(p, 8));
+			if(diff == -1) continue;
+			diff /= 2;
 			uint32_t oldCluster;
 			uint32_t newCluster;
 			uint32_t oldIitem;
-			switch (diff) {
+			switch(diff) {
 				case 1:
 					// at -+1
 					oldCluster = std::max(cl1[first].label, cl1[second].label);
@@ -421,7 +465,9 @@ int transform::cmdClusterize() {
 						cl2[oldIitem].label = newCluster;
 						std::swap(cl2[oldIitem].next_id, cl2[newCluster].next_id);
 					}
-					//break;
+					else {
+						break;
+					}
 					[[fallthrough]];
 				case 3:
 					// at -+3
@@ -434,7 +480,9 @@ int transform::cmdClusterize() {
 						cl3[oldIitem].label = newCluster;
 						std::swap(cl3[oldIitem].next_id, cl3[newCluster].next_id);
 					}
-					//break;
+					else {
+						break;
+					}
 					[[fallthrough]];
 				case 4:
 					// at -+4

@@ -8,6 +8,7 @@
 
 struct transform {
 	static int cmdSolRowMinLex();
+	static int cmdPatMinLex();
 	static int cmdMinimizeRandom();
 	static int cmdMaximizeRandom();
 	static int cmdAddRedundant();

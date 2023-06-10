@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <memory.h>
+#include <random>
 #include "fsss2.h"
 
 //game mode flags
@@ -212,6 +213,12 @@ constexpr tripletMask constraints::tripletMasks[54] = {
 #endif
 
 namespace fsss2 {
+
+int rand729() {
+    static std::mt19937 generator;
+    static std::uniform_int_distribution<int> distribution(0, 728);
+    return distribution(generator);
+}
 
 template <class X> fsss2<X>::fsss2(X &theCollector) : mode(0), guessDepth(0)
 #ifdef USE_LOCKED_CANDIDATES
@@ -1665,6 +1672,19 @@ nextGuess:
 					}
 				}
 			}
+//			// random strategy: pick a random ono-resolved pencilmark
+//			{
+//				do {
+//					int rnd = rand729();
+//					int d = rnd / 81;
+//					int c = rnd % 81;
+//					if(grid[d].isBitSet(c)) {
+//						optDigit = d;
+//						optCell = c;
+//						break;
+//					}
+//				} while(1);
+//			}
 //			{ //strategy 3: most direct eliminations for all values;  slower than 2a alternative
 //				bm128 uncheckedCells(all);
 //				int maxEliminations = 0;
@@ -2291,6 +2311,26 @@ int getNSolutions::solve(const pencilmarks& forbiddenValuePositions, pencilmarks
 	solver.solve(forbiddenValuePositions);
 	//return nsol >= max_solutions_ ? -1 : nsol;
 	return nsol > max_solutions_ ? -1 : nsol;
+}
+int getNSolutions::getShortDP(const pencilmarks& forbiddenValuePositions, pencilmarks& best, int max_solutions) {
+	pencilmarks* resArray = (pencilmarks*)alloca(max_solutions * sizeof(pencilmarks));
+	int numSols = solve(forbiddenValuePositions, resArray, max_solutions);
+	if(numSols < 2) return numSols; // puzzle with none or one solutions has no deadly patterns
+	//compare each solution to each other
+	pencilmarks test;
+	int bestSize = 1000;
+	for(int s1 = 0; s1 < numSols - 1; s1++) {
+		for(int s2 = s1 + 1; s2 < numSols; s2++) {
+			test = resArray[s1]; // structure copy
+			test ^= resArray[s2];
+			int testSize = test.popcount();
+			if(bestSize > testSize) {
+				best = test;
+				bestSize = testSize;
+			}
+		}
+	}
+	return numSols;
 }
 
 bool getAnySolution::solutionFound() {

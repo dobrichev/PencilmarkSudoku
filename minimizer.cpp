@@ -518,7 +518,7 @@ void minimizer::addCluesAnyGridPreSolve(const pencilmarks& pm, int numCluesToAdd
 //	if(numSol == -1) return; // > INT_MAX, skip
 //	if(numSol == 0) return; // save your time
 //	allSolutions.fromSolver(); //invert
-	ms.solve(pm, allSolutions); //this returns the number of redundant constraints
+	ms.solve(pm, allSolutions); //this sets allSolutions to the union of all solutions and returns the number of redundant constraints
 	addCluesFromMask(pm, allSolutions, numCluesToAdd, 0); // iterate only unsolved pencilmarks
 }
 
@@ -626,9 +626,11 @@ void minimizer::addCluesAnyGridFast(const pencilmarks& pm, int numCluesToAdd, co
 	bool found = false;
 	pencilmarks pm1(pm);
 	if(numCluesToAdd) {
-		fsss2::getTwoSolutions ts;
+		//fsss2::getTwoSolutions ts; // for determining the first found deadly pattern
+		fsss2::getNSolutions ts; // for determining the first found small deadly pattern
 		pencilmarks firstUnhitDeadlyPattern;
-		switch(ts.solve(pm1, firstUnhitDeadlyPattern)) {
+		//switch(ts.solve(pm1, firstUnhitDeadlyPattern)) {
+		switch(ts.getShortDP(pm1, firstUnhitDeadlyPattern, 20)) {
 			case 0: return; // no solution
 			case 1: // single solution
 			{
@@ -638,17 +640,12 @@ void minimizer::addCluesAnyGridFast(const pencilmarks& pm, int numCluesToAdd, co
 			break;
 			default: // 2+ solutions
 			{
-					//bm128 simpleUA(firstUnhitDeadlyPattern[0]);
-					//for(int d = 1; d < 9; d++) {
-					//	simpleUA |= firstUnhitDeadlyPattern[d];
-					//}
 				pencilmarks skipMe(pm1);
 				skipMe |= deadClues;
-				firstUnhitDeadlyPattern.clearBits(skipMe); // don't attempt to set either already givens nor dead clues
 				pencilmarks cluesToTest(firstUnhitDeadlyPattern);
-				cluesToTest.clearBits(skipMe);
+				cluesToTest.clearBits(skipMe); // don't attempt to set either already givens nor dead clues
 				//{
-				//	printf("%d\t%d\t%d\n", numCluesToAdd, cluesToTest.popcount(), simpleUA.popcount_128());
+				//	if(numCluesToAdd > 1) printf("%d\t%d\n", numCluesToAdd, cluesToTest.popcount());
 				//}
 				for(int d = 0; d < 9; d++) {
 					if(cluesToTest[d].isZero()) continue;
@@ -656,7 +653,8 @@ void minimizer::addCluesAnyGridFast(const pencilmarks& pm, int numCluesToAdd, co
 						if(!cluesToTest[d].isBitSet(c)) continue; //already forbidden
 						pm1[d].setBit(c);
 						skipMe[d].setBit(c);
-						addCluesAnyGrid(pm1, numCluesToAdd - 1, skipMe);
+						//addCluesAnyGrid(pm1, numCluesToAdd - 1, skipMe);
+						addCluesAnyGridFast(pm1, numCluesToAdd - 1, skipMe);
 						pm1[d].clearBit(c);
 					}
 				}

@@ -45,6 +45,9 @@ options::options() {
 	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
 	//anyopt.setCommandFlag("vanilla");
 
+	anyopt.addUsage(" --patminlex         Transform puzzles to their pattern-minimal morph");
+	anyopt.setCommandFlag("patminlex");
+
 	anyopt.addUsage(" --minimizerandom    Remove all redundant constraints from valid puzzles randomly");
 	anyopt.setCommandFlag("minimizerandom");
 	anyopt.addUsage("   --vanilla             Input is vanilla 81-char puzzles (default is 729-char pencilmarks)");
@@ -191,6 +194,9 @@ int options::execCommand() {
 	}
 	if(anyopt.getFlag("solrowminlex")) {
 		return transform::cmdSolRowMinLex();
+	}
+	if(anyopt.getFlag("patminlex")) {
+		return transform::cmdPatMinLex();
 	}
 	if(anyopt.getFlag("minimizerandom")) {
 		return transform::cmdMinimizeRandom();
